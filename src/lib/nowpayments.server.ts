@@ -38,8 +38,9 @@ export async function verifyIpn(body: unknown, signature: string, secret: string
 
 export function rest(path: string, init: RequestInit & { token?: string; admin?: boolean } = {}) {
   const service = process.env["PLOTOS_SERVICE_ROLE_KEY"];
-  const auth = init.admin ? service : init.token;
   if (init.admin && !service) throw new Error("PLOTOS_SERVICE_ROLE_KEY missing");
+  // sb_secret_ keys are opaque (not JWTs): send only as apikey, never as Bearer.
+  const auth = init.admin ? (service!.startsWith("sb_secret_") ? undefined : service) : init.token;
   return fetch(`${PLOTOS_SB_URL}${path}`, {
     ...init,
     headers: {
