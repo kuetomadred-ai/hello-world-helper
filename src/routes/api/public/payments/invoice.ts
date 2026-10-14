@@ -26,10 +26,10 @@ export const Route = createFileRoute("/api/public/payments/invoice")({
         const rows = r.ok ? ((await r.json()) as Record<string, unknown>[]) : [];
         const fr = rows[0];
         if (!fr) return new Response("Not found", { status: 404 });
-        const amount = Number(fr.fee_usd ?? fr.price_usd ?? fr.fee ?? 0);
+        const amount = Number(fr["fee_usd"] ?? fr["price_usd"] ?? fr["fee"] ?? 0);
         if (!(amount > 0)) return new Response("No fee on request", { status: 422 });
 
-        const apiKey = process.env.NOWPAYMENTS_API_KEY;
+        const apiKey = process.env["NOWPAYMENTS_API_KEY"];
         if (!apiKey) return new Response("Payments not configured", { status: 503 });
         const origin = new URL(request.url).origin;
         const inv = await fetch("https://api.nowpayments.io/v1/invoice", {

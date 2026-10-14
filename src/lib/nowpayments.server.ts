@@ -37,7 +37,7 @@ export async function verifyIpn(body: unknown, signature: string, secret: string
 }
 
 export function rest(path: string, init: RequestInit & { token?: string; admin?: boolean } = {}) {
-  const service = process.env.PLOTOS_SERVICE_ROLE_KEY;
+  const service = process.env["PLOTOS_SERVICE_ROLE_KEY"];
   const auth = init.admin ? service : init.token;
   if (init.admin && !service) throw new Error("PLOTOS_SERVICE_ROLE_KEY missing");
   return fetch(`${PLOTOS_SB_URL}${path}`, {
