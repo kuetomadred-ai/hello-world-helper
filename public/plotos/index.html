@@ -3121,6 +3121,8 @@ function plansHTML(){
  '<div class="pp" style="line-height:1.8">'+esc(targetText)+'<br>Daily loss: '+(t.dailyLossPct>0?t.dailyLossPct+'%':'Off')+' · '+(t.trailingDD?'Trailing ':'')+'Max drawdown: '+t.maxDDPct+'%<br>Min. trading days: '+(t.minDays||0)+' · Leverage: 1:'+t.lev+'<br>Profit share: '+esc(splitText)+' · Payout cadence: '+(t.payoutCadenceDays?t.payoutCadenceDays+' days':'per staff policy')+'</div></div>'+
  '<div style="margin:8px 14px 0"><button class="btn" id="rqGo">'+(t.programMode==='instant'?'Request simulated funding':'Request challenge review')+'</button>'+
  (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet">Pay from simulated wallet & request review</button>':'')+
+ '<button class="btn" style="margin-top:8px" id="rqCrypto">الدفع بالعملات الرقمية (NOWPayments)</button>'+
+ '<div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.7">رسوم برنامج محاكاة. يبقى الطلب قيد الانتظار حتى موافقة ADMIN/FINANCE حتى بعد الدفع.</div>'+
  '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">Simulation only: balances and payouts are virtual. Requests await ADMIN/FINANCE approval; no live broker or external payment processor is connected. '+esc(DB.settings.paymentInfo||'')+'</div></div>'}
 function bindReq(){
  $$('[data-program]').forEach(function(p){p.onclick=function(){programSel=p.getAttribute('data-program');var options=selectedProgramTemplates();planSel=options.length?options[0].id:null;renderProp()}});
@@ -3131,6 +3133,15 @@ function bindReq(){
   audit(u.email,'Program Requested',t.name,'Staff approval required');
   notify(u.id,'info','Program request submitted','Your request is pending staff approval; no trading account is active yet.');
   save();toast('Request submitted','up');renderProp()};
+ var rc=$('#rqCrypto');
+ if(rc)rc.onclick=function(){var t=selectedPlanTemplate();if(!t){toast('Program unavailable','dn');return}
+  if(!CLOUD.sb){toast('سجّل الدخول أولاً','dn');return}
+  rc.disabled=true;
+  CLOUD.sb.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s)throw new Error('سجّل الدخول أولاً');
+   return fetch((window.top&&window.top.location?window.top.location.origin:location.origin)+'/api/public/payments/invoice',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify({templateId:t.id})})})
+  .then(function(res){if(!res.ok)return res.text().then(function(x){throw new Error(x||'تعذر إنشاء الفاتورة')});return res.json()})
+  .then(function(d){(window.top||window).location.href=d.url})
+  .catch(function(e){rc.disabled=false;toast(e.message,'dn')})};
  var rw=$('#rqWallet');
  if(rw)rw.onclick=function(){var u=user(),t=selectedPlanTemplate();if(!t)return;
   var w=wallet(u);
