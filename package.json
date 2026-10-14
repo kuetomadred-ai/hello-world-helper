@@ -6,6 +6,12 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "mobile:build": "npm run build && node scripts/prepare-capacitor-assets.mjs",
+    "mobile:sync": "npm run mobile:build && cap sync",
+    "mobile:sync:android": "npm run mobile:build && cap sync android",
+    "mobile:sync:ios": "npm run mobile:build && cap sync ios",
+    "mobile:android": "npm run mobile:sync:android && cap open android",
+    "mobile:ios": "npm run mobile:sync:ios && cap open ios",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -17,6 +23,10 @@
     "rolldown": "1.2.1"
   },
   "dependencies": {
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -71,6 +81,8 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
+    "esbuild": "^0.25.0",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "2.25.3",
     "@testing-library/jest-dom": "^6.6.0",
