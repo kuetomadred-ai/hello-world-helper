@@ -934,7 +934,7 @@ var svT=null,clT=null;
 function savePrefs(){try{localStorage.setItem('plotos_prefs',JSON.stringify({theme:DB.settings.theme,lang:DB.settings.lang,lastSym:DB.settings.lastSym,lastTf:DB.settings.lastTf,favorites:DB.settings.favorites,watchlist:DB.settings.watchlist,ind:DB.settings.ind,oscH:DB.settings.oscH,drawings:DB.settings.drawings,priceMargins:DB.settings.priceMargins,chart:DB.settings.chart}))}catch(e){}}
 function save(){savePrefs();if(DEMO_MODE)return Promise.resolve(true);clearTimeout(svT);clearTimeout(clT);
  if(!CLOUD.ok||!CLOUD.hydrated){CLOUD.pending=true;return Promise.resolve(false)}
- clT=setTimeout(function(){cloudPush().catch(function(e){CLOUD.lastError=e;CLOUD.online=false})},300);
+ clT=setTimeout(function(){cloudPush().catch(function(e){CLOUD.lastError=e;CLOUD.online=false})},150);
  return Promise.resolve(true)}
 window.addEventListener('beforeunload',function(){savePrefs()});
 function mkAccount(userId,templateId,kind){
@@ -984,7 +984,7 @@ function cloudInit(){
    }).then(function(){return queuePendingEmails()}).then(function(){
     if($('#auth').style.display!=='none')renderAuth();
     if(user())renderView();resolve(true)}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e;reject(e)});
-   setInterval(function(){cloudPoll().then(function(){CLOUD.online=true}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e})},7000);
+   var pollBusy=false;setInterval(function(){if(pollBusy||document.hidden)return;pollBusy=true;cloudPoll().then(function(){CLOUD.online=true}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e}).then(function(){pollBusy=false})},1000);
   }catch(e){reject(e)}})});
 }
 function publicUser(u){var p={};Object.keys(u||{}).forEach(function(k){if(k!=='pass')p[k]=u[k]});return p}
