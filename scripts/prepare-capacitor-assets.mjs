@@ -2,7 +2,17 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import { resolve } from "node:path";
 import { build } from "esbuild";
 
-const source = resolve(".output/public/plotos");
+// Build output may land in .output/public or dist/client depending on the bundler preset.
+// Copy to a temp folder first because the destination (dist) can contain the source.
+const candidates = [".output/public/plotos", "dist/client/plotos", "public/plotos"].map((p) => resolve(p));
+const found = candidates.find((p) => existsSync(resolve(p, "index.html"))) ?? candidates[0];
+const staging = resolve("node_modules/.cache/plotos-mobile");
+if (existsSync(resolve(found, "index.html"))) {
+  rmSync(staging, { recursive: true, force: true });
+  mkdirSync(staging, { recursive: true });
+  cpSync(found, staging, { recursive: true });
+}
+const source = staging;
 const destination = resolve("dist");
 const entryPoint = resolve(source, "index.html");
 
