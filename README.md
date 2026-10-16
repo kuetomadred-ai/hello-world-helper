@@ -31,8 +31,6 @@ bun run lint
 bun run build
 cd backend && bun install --frozen-lockfile && bun run typecheck && bun run test
 ```
-<<<<<<< /dev-server/README.md
-=======
 
 ## Capacitor (Android and iOS)
 
@@ -72,4 +70,3 @@ Native Supabase sessions use iOS Keychain / Android Keystore via `@aparajita/cap
 ### Mobile email confirmation
 
 The native projects register the `com.plutus.trading://auth/callback` URL scheme, and the mobile build handles Supabase confirmation links sent to that URI. In the Supabase Dashboard, add the exact URI under **Authentication → URL Configuration → Redirect URLs** before testing signup or resend-confirmation on a device. For production, prefer Universal Links/App Links on a domain you own; domain association and release signing must be configured for that domain.
->>>>>>> /tmp/m/theirs
