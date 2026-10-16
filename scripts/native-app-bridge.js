@@ -2,7 +2,7 @@ import { App } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 
 if (Capacitor.isNativePlatform()) {
-  window.PLOTOS_NATIVE = true;
+  window.PLUTUS_NATIVE = true;
 
   App.addListener("backButton", ({ canGoBack }) => {
     const sheet = document.getElementById("mt5ModifySheet");
@@ -30,8 +30,8 @@ if (Capacitor.isNativePlatform()) {
   const deliverUrl = (url) => {
     if (!url || deliveredUrls.has(url)) return;
     deliveredUrls.add(url);
-    window.__PLOTOS_NATIVE_URL = url;
-    window.dispatchEvent(new CustomEvent("plotos:native-url", { detail: url }));
+    window.__PLUTUS_NATIVE_URL = url;
+    window.dispatchEvent(new CustomEvent("plutus:native-url", { detail: url }));
   };
 
   App.addListener("appUrlOpen", ({ url }) => deliverUrl(url));
@@ -39,5 +39,5 @@ if (Capacitor.isNativePlatform()) {
     .then((launch) => deliverUrl(launch?.url))
     .catch(() => {});
 } else {
-  window.PLOTOS_NATIVE = false;
+  window.PLUTUS_NATIVE = false;
 }

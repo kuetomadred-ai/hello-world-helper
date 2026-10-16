@@ -78,10 +78,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "PLOTOS FUND" },
-      { name: "description", content: "PLOTOS FUND mobile trading platform." },
-      { name: "author", content: "PLOTOS FUND" },
-      { property: "og:title", content: "PLOTOS FUND" },
+      { title: "Plutus" },
+      { name: "description", content: "Plutus mobile trading platform." },
+      { name: "author", content: "Plutus" },
+      { property: "og:title", content: "Plutus" },
       {
         property: "og:description",
         content: "Mobile charts, live market data, and trading tools.",

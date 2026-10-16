@@ -41,7 +41,7 @@ const capacitorConfig = JSON.parse(
   readFileSync(path.join(project, "capacitor.config.json"), "utf8"),
 ) as { appId: string };
 
-const appUrl = "com.plotos.trading://auth/callback?code=confirmation-code";
+const appUrl = "com.plutus.trading://auth/callback?code=confirmation-code";
 
 describe("Capacitor deep-link bridge", () => {
   beforeEach(async () => {
@@ -50,27 +50,27 @@ describe("Capacitor deep-link bridge", () => {
     mocks.listeners = {};
     mocks.native = true;
     mocks.launchUrl = null;
-    Object.assign(window, { PLOTOS_NATIVE: false, __PLOTOS_NATIVE_URL: undefined });
+    Object.assign(window, { PLUTUS_NATIVE: false, __PLUTUS_NATIVE_URL: undefined });
     await import("../../scripts/native-app-bridge.js");
   });
 
   it("delivers app-open URLs once to the web auth listener", () => {
     const received: string[] = [];
-    window.addEventListener("plotos:native-url", (event) => {
+    window.addEventListener("plutus:native-url", (event) => {
       received.push((event as CustomEvent<string>).detail);
     });
 
     mocks.listeners.appUrlOpen?.({ url: appUrl });
     mocks.listeners.appUrlOpen?.({ url: appUrl });
 
-    expect(window.PLOTOS_NATIVE).toBe(true);
-    expect(window.__PLOTOS_NATIVE_URL).toBe(appUrl);
+    expect(window.PLUTUS_NATIVE).toBe(true);
+    expect(window.__PLUTUS_NATIVE_URL).toBe(appUrl);
     expect(received).toEqual([appUrl]);
   });
 
   it("delivers the URL that launched a cold-started app", async () => {
     const received: string[] = [];
-    window.addEventListener("plotos:native-url", (event) => {
+    window.addEventListener("plutus:native-url", (event) => {
       received.push((event as CustomEvent<string>).detail);
     });
     mocks.launchUrl = { url: appUrl };
@@ -84,8 +84,8 @@ describe("Capacitor deep-link bridge", () => {
 
   it("uses the same custom URL scheme on Android, iOS, and Capacitor", () => {
     expect(androidManifest).toContain("@string/custom_url_scheme");
-    expect(androidStrings).toContain('name="custom_url_scheme">com.plotos.trading</string>');
-    expect(iosInfo).toContain("<string>com.plotos.trading</string>");
-    expect(capacitorConfig.appId).toBe("com.plotos.trading");
+    expect(androidStrings).toContain('name="custom_url_scheme">com.plutus.trading</string>');
+    expect(iosInfo).toContain("<string>com.plutus.trading</string>");
+    expect(capacitorConfig.appId).toBe("com.plutus.trading");
   });
 });

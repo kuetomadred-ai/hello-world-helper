@@ -52,8 +52,14 @@ describe("simulated broker commission policy", () => {
     expect(api.commissionForLots(account, Number.NaN)).toBe(0);
   });
 
-  it("uses the policy for both full and partial closes", () => {
-    expect(page).toContain("var comm=commissionForLots(a,p.lots)");
-    expect(page).toContain("var comm=commissionForLots(a,closeLots)");
+  it("routes full and partial closes to the server instead of changing balances in the client", () => {
+    const partialStart = page.indexOf("function closePartial(p,frac)");
+    const partialEnd = page.indexOf("function closeAll(", partialStart);
+    const partial = page.slice(partialStart, partialEnd);
+    expect(page).toContain("/v1/positions/'+encodeURIComponent(p.id)+'/close-partial");
+    expect(page).toContain("/v1/positions/'+encodeURIComponent(p.id)+'/close");
+    expect(partial).toContain("TradingProvider.closePartial(p,closeLots)");
+    expect(partial).not.toContain("a.balance=");
+    expect(page).not.toContain("setInterval(function(){try{engineTick()}catch(e){}},600)");
   });
 });

@@ -23,7 +23,7 @@ const loadCatalogue = new Function(
 const { PROP_PROGRAMS, BROKER_SIM_TEMPLATES, programTemplateRecords, challengeTargets } =
   loadCatalogue();
 
-describe("PLOTOS simulated funding catalogue", () => {
+describe("Plutus simulated funding catalogue", () => {
   it("provides the requested 2-step, 1-step, and direct tiers", () => {
     expect(PROP_PROGRAMS.map((program) => program.id)).toEqual([
       "prog_2step",
@@ -241,16 +241,16 @@ describe("PLOTOS simulated funding catalogue", () => {
     expect(db.payouts[0]).toMatchObject({ status: "PENDING", amount: 160, payoutSplit: 80 });
   });
 
-  it("keeps requests pending and credits a wallet-paid fee once on payout approval", () => {
+  it("submits funding through the authenticated RPC and disables local wallet debits", () => {
     const bindReqStart = page.indexOf("function bindReq(){");
     const bindReqEnd = page.indexOf("\nfunction bindProp(", bindReqStart);
     const bindReq = page.slice(bindReqStart, bindReqEnd);
 
-    expect(bindReq).toContain("status:'PENDING'");
-    expect(bindReq).toContain("WALLET_PAID_PENDING_REVIEW");
-    expect(bindReq).not.toContain("assignCloud(");
-    expect(page).toContain("requestMeta.paymentStatus==='WALLET_PAID_PENDING_REVIEW'");
-    expect(page).toContain("p.status!=='PENDING'");
-    expect(page).toContain("a.ch.feeRefunded=true");
+    expect(bindReq).toContain("CLOUD.sb.rpc('pf_create_funding_request'");
+    expect(bindReq).toContain("p_program_code:t.programId");
+    expect(bindReq).toContain("p_account_size:+t.size");
+    expect(bindReq).not.toContain("DB.chRequests.unshift");
+    expect(bindReq).not.toContain("wTx(");
+    expect(page).toContain('id="rqWallet" disabled');
   });
 });
