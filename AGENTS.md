@@ -9,10 +9,10 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- The PLOTOS FUND app lives as a self-contained page in public/plotos/ and the home page shows it full-screen; edit that file directly so the existing trading engine and Biquote feed stay untouched.
+- The Plutus app lives as a self-contained page in public/plotos/ and the home page shows it full-screen; edit that file directly so the existing trading engine and Biquote feed stay untouched.
 - Keep chart interaction on Lightweight Charts plus a pointer-event canvas overlay, so live prices, orders, and saved drawings share one coordinate system.
 - Use one pointer-event SL/TP drag handler and keep previews separate from saved position state until explicit confirmation, to prevent competing gestures and accidental saves.
-- PLOTOS accounts and trading are simulated; never present them as live broker accounts or real-money execution unless a verified broker and payment integration is actually implemented.
+- Plutus accounts and trading are simulated; never present them as live broker accounts or real-money execution unless a verified broker and payment integration is actually implemented.
 - Challenge requests stay pending until approved by ADMIN or FINANCE. Account assignment/approval is not a payment processor; wallet entries are client-synced and must be manually verified. Only ADMIN may change/reset/fund account state.
 - Client-side role checks are UX safeguards, not authorization boundaries. Never add client-editable role fields or RLS policies that let a trader change roles, account status, balances, risk rules, or firm settings. Real enforcement requires server-side authorization/RPCs and database policies; do not claim it is secure until deployed and verified.
 - Do not add parallel Supabase auth/account tables without reviewing the existing `pf_users_data`/`pf_firm` blob sync and current policies. Never apply a migration to the live project without showing its exact effects and obtaining approval.

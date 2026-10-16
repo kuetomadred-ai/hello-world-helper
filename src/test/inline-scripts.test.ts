@@ -19,4 +19,12 @@ describe("embedded application scripts", () => {
       expect(() => new Function(source), `inline script ${index + 1}`).not.toThrow();
     });
   });
+
+  it("keeps auth preflight callable and offers server-side paper trading only", () => {
+    expect(page).toContain("var landingHtml=PORTAL_ADMIN?");
+    expect(page).toContain("function pre(){return CLOUD.ok?cloudPull():Promise.resolve()}");
+    expect(page).not.toMatch(/\bvar pre=/);
+    expect(page).toContain('id="demoBtn">Sign in for paper trading');
+    expect(page).toContain("Paper trading runs on the server; sign in.");
+  });
 });

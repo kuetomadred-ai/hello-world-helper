@@ -1,6 +1,6 @@
 {
-  "appId": "com.plotos.trading",
-  "appName": "PLOTOS FUND",
+  "appId": "com.plutus.trading",
+  "appName": "Plutus",
   "webDir": "dist",
   "backgroundColor": "#080C16",
   "android": {
