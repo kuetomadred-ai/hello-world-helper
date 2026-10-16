@@ -1021,11 +1021,7 @@ function cloudInit(){
    }).then(function(){return queuePendingEmails()}).then(function(){
     if($('#auth').style.display!=='none')renderAuth();
     if(user())renderView();resolve(true)}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e;reject(e)});
-<<<<<<< /dev-server/public/plotos/index.html
    var pollBusy=false;setInterval(function(){if(pollBusy||document.hidden)return;pollBusy=true;cloudPoll().then(function(){CLOUD.online=true}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e}).then(function(){pollBusy=false})},1000);
-=======
-   setInterval(function(){cloudPoll().then(function(){if(PORTAL_ADMIN)CLOUD.online=true}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e})},7000);
->>>>>>> /tmp/m/theirs
   }catch(e){reject(e)}})});
 }
 function publicUser(u){var p={};Object.keys(u||{}).forEach(function(k){if(k!=='pass')p[k]=u[k]});return p}
@@ -2530,11 +2526,7 @@ function renderAuth(notice){var setup=false;
    return'<div class="lp-plan '+(i===0?'hot':'')+'">'+(i===0?'<em>'+esc(p.badge)+'</em>':'')+'<small>'+esc(p.shortName)+'</small><b>$'+(lo.size/1000)+'K–$'+(hi.size/1000)+'K</b><ul><li><span>Targets</span><i>'+esc(target)+'</i></li><li><span>Max drawdown</span><i>'+(p.trailingDD?'Trailing ':'')+p.maxDDPct+'%</i></li><li><span>Daily limit</span><i>'+(p.dailyLossPct?p.dailyLossPct+'%':'None')+'</i></li><li><span>Leverage</span><i>1:'+lo.lev+'</i></li><li><span>Fee range</span><i>$'+lo.fee+'–$'+hi.fee+'</i></li><li><span>Profit share</span><i>'+p.splitMin+'%–'+p.splitMax+'%</i></li><li><span>Fee credit</span><i>Wallet-paid fee returned at first approved payout</i></li></ul><button class="lp-cta lp-go">'+(p.mode==='instant'?'Request simulated account':'Request challenge review')+'</button></div>'}).join('')}
  $('#auth').style.display='flex';$('#app').style.display='none';
  var landingHtml=PORTAL_ADMIN?'':'<div class="lp">'+
-<<<<<<< /dev-server/public/plotos/index.html
-  '<nav class="lp-nav"><div class="lp-brand"><span class="lp-logo">P</span>PLOTOS<b>FUND</b></div><div class="lp-links"><a data-go="programs">Programs</a><a data-go="how">How it works</a><a data-go="platform">Platform</a><a data-go="broker">Broker simulator</a><a data-go="faq">FAQ</a></div><button class="lp-ghost" id="preDemo">Free demo</button><button class="lp-cta lp-go">Get funded</button></nav>'+
-=======
-  '<nav class="lp-nav"><div class="lp-brand"><span class="lp-logo">P</span>Plutus<b>FUND</b></div><div class="lp-links"><a data-go="programs">Programs</a><a data-go="how">How it works</a><a data-go="platform">Platform</a><a data-go="broker">Broker simulator</a><a data-go="faq">FAQ</a></div><button class="lp-ghost" id="preDemo">Sign in for paper trading</button><button class="lp-cta lp-go">Get funded</button></nav>'+
->>>>>>> /tmp/m/theirs
+  '<nav class="lp-nav"><div class="lp-brand"><span class="lp-logo">P</span>PLUTUS</div><div class="lp-links"><a data-go="programs">Programs</a><a data-go="how">How it works</a><a data-go="platform">Platform</a><a data-go="broker">Broker simulator</a><a data-go="faq">FAQ</a></div><button class="lp-ghost" id="preDemo">Sign in for paper trading</button><button class="lp-cta lp-go">Get funded</button></nav>'+
   '<div class="lp-ticker"><div class="lp-track" id="lpTrack"></div></div>'+
   '<header class="lp-hero"><div class="lp-copy"><span class="lp-pill"><i></i>Simulated programs · clear rules</span><h2>Build your edge.<br><span>Practice with a plan.</span></h2><p>Compare structured simulated funding paths, review risk rules up front, and practice on Biquote-priced markets in an MT5-inspired workspace. No live broker or payment processor is connected.</p><div class="lp-actions"><button class="lp-cta big lp-go">Start the challenge</button><button class="lp-ghost big" id="preLearn">How it works →</button></div><div class="lp-stats"><div><b>'+PROP_PROGRAMS.length+'</b><small>Funding paths</small></div><div><b>'+BROKER_SIM_TEMPLATES.length+'</b><small>Practice profiles</small></div><div><b>1–2</b><small>Evaluation phases</small></div><div><b>Staff</b><small>Activation review</small></div></div></div><div class="lp-auth" id="heroAuth"><div class="lp-auth-h"><b>Client area</b><span>Sign in or create your profile</span></div></div></header>'+
   '<div class="lp-trust"><span>Market data</span><b>Biquote</b><span>Variable Bid / Ask</span><span>Historical OHLC</span><span>Streaming ticks</span><span style="display:inline-flex;align-items:center;gap:8px"><img src="assets/mt5-app-icon.png" alt="MetaTrader 5 icon" width="24" height="24" style="object-fit:contain">MT5-style simulator</span></div>'+
@@ -2543,13 +2535,9 @@ function renderAuth(notice){var setup=false;
   '<section class="lp-sec" id="lp-how"><span class="lp-kicker">HOW IT WORKS</span><h3>Three steps to your practice path</h3><div class="lp-steps"><div><i>1</i><b>Choose a path</b><p>Compare the 1-step, 2-step and direct simulated programs and review their rules.</p></div><div><i>2</i><b>Review</b><p>Your simulated account results and risk-rule compliance are recorded for review.</p></div><div><i>3</i><b>Staff review</b><p>Authorized staff review each request before simulated account access is activated.</p></div></div></section>'+
   '<section class="lp-sec lp-platform" id="lp-platform"><div><span class="lp-kicker">PLATFORM</span><h3>A mobile-ready practice terminal</h3><p class="lp-lead">Market Watch, one-click trading, pending orders, SL/TP drag on chart, 30+ indicators, 9 timeframes and full trade history — wherever you are.</p><ul class="lp-feat"><li>Biquote Bid/Ask prices; streaming ticks when available</li><li>Candlestick, bar and line charts</li><li>Market, Limit and Stop orders</li><li>Real-time margin and risk monitoring</li></ul></div><div class="lp-phone"><div class="lp-screen"><div class="lp-qh"><span>Quotes</span></div><div id="lpQuotes"></div></div></div></section>'+
   '<section class="lp-sec" id="lp-faq"><span class="lp-kicker">FAQ</span><h3>Frequently asked questions</h3><div class="lp-faq"><details><summary>What is a prop trading challenge?</summary><p>An evaluation where you trade a simulated account under configured risk rules.</p></details><details><summary>Where do prices come from?</summary><p>Symbols, Bid/Ask prices and historical candles are supplied by Biquote.</p></details><details><summary>Are funds and payouts real?</summary><p>No. Plutus is currently a prop-trading simulator. Deposits, withdrawals and broker execution are not enabled.</p></details><details><summary>What happens when a market closes?</summary><p>The last available Biquote price remains visible, clearly marked as closed, while new market orders stay disabled.</p></details></div></section>'+
-  '<footer class="lp-foot"><div class="lp-brand"><span class="lp-logo">P</span>Plutus<b>FUND</b></div><p>Plutus is a trading simulator: accounts, orders, program outcomes and payouts are virtual. No live broker or payment connection is enabled.</p><small>© 2026 Plutus. All rights reserved.</small></footer></div>';
+  '<footer class="lp-foot"><div class="lp-brand"><span class="lp-logo">P</span>PLUTUS</div><p>Plutus is a trading simulator: accounts, orders, program outcomes and payouts are virtual. No live broker or payment connection is enabled.</p><small>© 2026 Plutus. All rights reserved.</small></footer></div>';
  var html='<div class="auth-box">'+
-<<<<<<< /dev-server/public/plotos/index.html
-  '<div class="logo"><span class="pmark">P</span><h1>'+(PORTAL_ADMIN?'PLOTOS ADMIN':'PLOTOS')+'</h1></div>'+
-=======
   '<div class="logo"><span class="pmark">P</span><img src="assets/mt5-app-icon.png" alt="MetaTrader 5 app icon" width="32" height="32" style="object-fit:contain"><h1>'+(PORTAL_ADMIN?'Plutus Admin':'Plutus')+'</h1></div>'+
->>>>>>> /tmp/m/theirs
   '<div class="auth-sub">'+(PORTAL_ADMIN?'Staff & Risk Control Portal · assigned accounts only':(CLOUD.ok?'Cloud connected':'Connecting…'))+'</div>'+landingHtml+
  '<div class="err" id="authErr"></div>';
  if(setup){
@@ -3170,24 +3158,20 @@ function plansHTML(){
  '<div class="plan on"><div class="ph"><span class="ps">'+esc(t.name)+'</span><span class="fee">$'+t.fee+'</span></div>'+
  '<div class="pp" style="line-height:1.8">'+esc(targetText)+'<br>Daily loss: '+(t.dailyLossPct>0?t.dailyLossPct+'%':'Off')+' · '+(t.trailingDD?'Trailing ':'')+'Max drawdown: '+t.maxDDPct+'%<br>Min. trading days: '+(t.minDays||0)+' · Leverage: 1:'+t.lev+'<br>Profit share: '+esc(splitText)+' · Payout cadence: '+(t.payoutCadenceDays?t.payoutCadenceDays+' days':'per staff policy')+'</div></div>'+
  '<div style="margin:8px 14px 0"><button class="btn" id="rqGo">'+(t.programMode==='instant'?'Request simulated funding':'Request challenge review')+'</button>'+
-<<<<<<< /dev-server/public/plotos/index.html
- (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet">Pay from simulated wallet & request review</button>':'')+
+ (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet" disabled title="Wallet migration pending">Wallet payment temporarily disabled — server migration pending</button>':'')+
  '<button class="btn" style="margin-top:8px" id="rqCrypto">الدفع بالعملات الرقمية (NOWPayments)</button>'+
  '<div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.7">رسوم برنامج محاكاة. يبقى الطلب قيد الانتظار حتى موافقة ADMIN/FINANCE حتى بعد الدفع.</div>'+
-=======
- (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet" disabled title="Wallet migration pending">Wallet payment temporarily disabled — server migration pending</button>':'')+
->>>>>>> /tmp/m/theirs
  '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">Simulation only: balances and payouts are virtual. Requests await ADMIN/FINANCE approval; no live broker or external payment processor is connected. '+esc(DB.settings.paymentInfo||'')+'</div></div>'}
 function bindReq(){
  $$('[data-program]').forEach(function(p){p.onclick=function(){programSel=p.getAttribute('data-program');var options=selectedProgramTemplates();planSel=options.length?options[0].id:null;renderProp()}});
  $$('[data-plan]').forEach(function(p){p.onclick=function(){planSel=p.getAttribute('data-plan');renderProp()}});
  var rg=$('#rqGo');
-<<<<<<< /dev-server/public/plotos/index.html
- if(rg)rg.onclick=function(){var u=user(),t=selectedPlanTemplate();if(!t){toast('Program unavailable','dn');return}
-  DB.chRequests.unshift({id:uid(),userId:u.id,templateId:t.id,programId:t.programId,fee:t.fee,txid:'',status:'PENDING',createdAt:Date.now()});
-  audit(u.email,'Program Requested',t.name,'Staff approval required');
-  notify(u.id,'info','Program request submitted','Your request is pending staff approval; no trading account is active yet.');
-  save();toast('Request submitted','up');renderProp()};
+ if(rg)rg.onclick=function(){var t=selectedPlanTemplate();if(!t){toast('Program unavailable','dn');return}
+  if(!user()||!CLOUD.sb){toast('Sign in before submitting a funding request','dn');return}
+  CLOUD.sb.rpc('pf_create_funding_request',{p_program_code:t.programId,p_account_size:+t.size}).then(function(result){
+   if(result.error)throw result.error;
+   toast('Request submitted securely — awaiting staff review','up');renderProp()
+  }).catch(function(error){toast(error.message||'Funding request failed','dn')})};
  var rc=$('#rqCrypto');
  if(rc)rc.onclick=function(){var t=selectedPlanTemplate();if(!t){toast('Program unavailable','dn');return}
   if(!CLOUD.sb){toast('سجّل الدخول أولاً','dn');return}
@@ -3197,14 +3181,6 @@ function bindReq(){
   .then(function(res){if(!res.ok)return res.text().then(function(x){throw new Error(x||'تعذر إنشاء الفاتورة')});return res.json()})
   .then(function(d){(window.top||window).location.href=d.url})
   .catch(function(e){rc.disabled=false;toast(e.message,'dn')})};
-=======
- if(rg)rg.onclick=function(){var t=selectedPlanTemplate();if(!t){toast('Program unavailable','dn');return}
-  if(!user()||!CLOUD.sb){toast('Sign in before submitting a funding request','dn');return}
-  CLOUD.sb.rpc('pf_create_funding_request',{p_program_code:t.programId,p_account_size:+t.size}).then(function(result){
-   if(result.error)throw result.error;
-   toast('Request submitted securely — awaiting staff review','up');renderProp()
-  }).catch(function(error){toast(error.message||'Funding request failed','dn')})};
->>>>>>> /tmp/m/theirs
  var rw=$('#rqWallet');
  if(rw)rw.onclick=function(){toast('Wallet payment is disabled until server-side wallet migration is complete','wn')}}
 function bindProp(a){
