@@ -972,7 +972,7 @@ function enginePosition(x,accountId,userId){return{id:x.id,accId:accountId,userI
 function engineRefresh(){
  if(PORTAL_ADMIN)return Promise.resolve(false);
  var u=user();if(!u)return Promise.resolve(false);
- if(!ENGINE.base){ENGINE.online=false;ENGINE.ready=false;DB.accounts=DB.accounts.filter(function(a){return a.userId!==u.id});DB.positions=DB.positions.filter(function(x){return x.userId!==u.id});DB.orders=DB.orders.filter(function(x){return x.userId!==u.id});DB.history=DB.history.filter(function(x){return x.userId!==u.id});return Promise.resolve(false)}
+ if(!ENGINE.base){ENGINE.online=false;ENGINE.ready=false;return Promise.resolve(false)}
 	 if(ENGINE.syncing)return ENGINE.syncPromise||Promise.resolve(false);ENGINE.syncing=true;
 	 ENGINE.syncPromise=engineRequest('/v1/accounts').then(function(res){
   var accounts=Array.isArray(res.accounts)?res.accounts:[];
@@ -1016,7 +1016,7 @@ function cloudInit(){
  return new Promise(function(resolve,reject){cloudLoadSdk(function(ok){if(!ok){reject(new Error('Cloud SDK unavailable'));return}
   try{var authOptions={};if(window.PLUTUS_NATIVE){if(!window.PLUTUS_SECURE_AUTH_STORAGE)throw new Error('Native secure session storage is unavailable');authOptions.storage=window.PLUTUS_SECURE_AUTH_STORAGE}
    CLOUD.sb=window.supabase.createClient(DB.settings.sbUrl,DB.settings.sbKey,{auth:authOptions});CLOUD.ok=true;
-   CLOUD.sb.auth.getSession().then(function(r){var au=r.data&&r.data.session&&r.data.session.user;if(au){DB.session=au.id;CLOUD.authRole=(au.app_metadata&&au.app_metadata.role)||null;upsertAuthProfile(au)}return cloudPull()}).then(function(){CLOUD.hydrated=true;CLOUD.online=PORTAL_ADMIN?true:ENGINE.online;
+   CLOUD.sb.auth.getSession().then(function(r){var au=r.data&&r.data.session&&r.data.session.user;if(au){DB.session=au.id;CLOUD.authRole=(au.app_metadata&&au.app_metadata.role)||null;upsertAuthProfile(au)}return cloudPull().catch(function(e){CLOUD.lastError=e})}).then(function(){CLOUD.hydrated=true;CLOUD.online=PORTAL_ADMIN?true:ENGINE.online;
     return CLOUD.pending&&PORTAL_ADMIN?cloudPush().then(function(){CLOUD.pending=false}):(CLOUD.pending=false,null);
    }).then(function(){return queuePendingEmails()}).then(function(){
     if($('#auth').style.display!=='none')renderAuth();
@@ -1175,9 +1175,11 @@ function finishNativeAuthLink(rawUrl){
 window.addEventListener('plutus:native-url',function(e){finishNativeAuthLink(e.detail)});
 function enterDemo(){
  if(PORTAL_ADMIN){toast('Demo trading login is available from the Trading Portal only','dn');return}
- var tab=$('#tabIn');
- if(tab){tab.click();tab.scrollIntoView({behavior:'smooth',block:'center'});return}
- var auth=$('#auth');if(auth&&auth.scrollIntoView)auth.scrollIntoView({behavior:'smooth',block:'center'})
+ DEMO_MODE=true;var id='demo-trader-local',u=DB.users.find(function(x){return x.id===id});
+ if(!u){u={id:id,email:'demo@plotos.local',name:'Demo Trader',role:'TRADER',status:'ACTIVE',createdAt:Date.now(),refCode:'PFDEMO01',kyc:'NONE',termsAt:Date.now(),_u:Date.now()};DB.users.push(u)}
+ var a=DB.accounts.find(function(x){return x.userId===id&&x.kind==='PAPER'});
+ if(!a){a=mkAccount(id,'t50','PAPER');a.login=90001;DB.accounts.push(a)}
+ DB.activeAcc[id]=a.id;DB.session=id;CLOUD.authRole='TRADER';termSym=SYMBOLS.XAUUSD?'XAUUSD':(SYMBOLS.XAUUSD_HKN?'XAUUSD_HKN':(SYIDS[0]||termSym));chart.sym=termSym;chart.tf='1m';DB.settings.lastSym=termSym;DB.settings.lastTf='1m';DB.settings.ind.rsi=false;save();audit('demo','Demo Login','account '+a.login,'Local paper account');enterApp(false)
 }
 function doLogout(){var u=user();var done=!DEMO_MODE&&CLOUD.ok?CLOUD.sb.auth.signOut():Promise.resolve();done.catch(function(){}).then(function(){if(u)audit(u.email,'Logout','user',DEMO_MODE?'Local demo':'Supabase Auth');DB.session=null;DEMO_MODE=false;save();closeDrawer();renderAuth()})}
 window.doLogout=doLogout;
@@ -1564,6 +1566,26 @@ var TradingProvider={
 	 modifyOrder:function(o,price,sl,tp){if(!cloudReady())return Promise.resolve(false);return engineRequest('/v1/orders/'+encodeURIComponent(o.id)+'/modify',{price:price,stopLoss:sl||null,takeProfit:tp||null}).then(function(){return engineRefresh()}).catch(function(e){toast(e.message||'Order update failed','dn');return false})},
 	 cancelOrder:function(o){if(!cloudReady())return Promise.resolve(false);return engineRequest('/v1/orders/'+encodeURIComponent(o.id)+'/cancel',{}).then(function(){return engineRefresh()}).catch(function(e){toast(e.message||'Order cancellation failed','dn');return false})}
 };
+function localReady(){return DEMO_MODE||(CLOUD.ok&&CLOUD.hydrated)}
+function useLocal(){return DEMO_MODE||!ENGINE.base}
+var LocalProvider={
+ name:'Plutus Local Paper',
+ getSymbols:function(){return SYIDS},
+ getQuote:function(s){return qt(s)},
+ getAccount:function(){return myAcc()},
+ getPositions:function(){var a=myAcc();return a?accPositions(a):[]},
+ getOrders:function(){var a=myAcc();return a?accOrders(a):[]},
+ place:function(sym,side,lots,type,price,sl,tp){if(!localReady())return{err:'Cloud database is offline — trading is temporarily disabled'};var a=myAcc();if(!a)return{err:'No account'};var r=placeOrder(a,sym,side,lots,type,price,sl,tp);return r&&r.err?{err:r.err}:r},
+ close:function(p,reason){if(!localReady())return false;var q=qt(p.symbol);if(!q)return false;var hl=holdLeftSec(p);if(hl>0&&(reason||'market')==='market'){toast('Minimum hold 1 minute — wait '+hl+'s','wn');return false}return closePosition(p,tradePrice(p.symbol,p.side,q),reason||'market')!==0},
+ closeAll:function(){if(!localReady())return false;var a=myAcc();if(a)closeAll(a,'market');return true},
+ modifyPosition:function(p,sl,tp,ts){if(!localReady())return false;p.sl=sl;p.tp=tp;p.ts=ts;save();return true},
+ modifyOrder:function(o,price,sl,tp){if(!localReady())return false;o.price=price;o.sl=sl;o.tp=tp;o.log.push({t:Date.now(),s:'MODIFIED'});save();return true},
+ cancelOrder:function(o){if(!localReady())return false;o.state='CANCELLED';o.status='CANCELLED';o.log.push({t:Date.now(),s:'CANCELLED'});save();return true}
+};
+
+
+['place','close','closePartial','closeAll','modifyPosition','modifyOrder','cancelOrder'].forEach(function(k){var f=TradingProvider[k];TradingProvider[k]=function(){if(!useLocal())return f.apply(TradingProvider,arguments);if(k==='closePartial')return Promise.reject(new Error('Partial close is unavailable in demo mode'));var r=LocalProvider[k].apply(LocalProvider,arguments);if(k==='place'){if(!r||r.err)return Promise.reject(new Error((r&&r.err)||'Order failed'));return Promise.resolve({p:r.p||null,o:r.o||null,fill:r.p&&r.p.entry})}return Promise.resolve(r)}});
+
 
 /* chart engine */
 var libPromise=null;
@@ -2565,8 +2587,8 @@ function renderAuth(notice){var setup=false;
    '<button class="btn" id="suBtn">Create account</button>'+
    '<div class="demo-hint">After signup you can watch prices & charts. A trading account is activated by the manager.</div></div>'+ 
    '<div style="display:flex;align-items:center;gap:8px;margin:14px 0 4px;color:var(--dim);font-size:10px"><span style="height:1px;background:var(--ln);flex:1"></span>SERVER-SIDE PAPER TRADING<span style="height:1px;background:var(--ln);flex:1"></span></div>'+
-   '<button class="btn ghost" id="demoBtn">Sign in for paper trading</button>'+
-   '<div class="demo-hint">Paper trading runs on the server; sign in. Local demo execution is disabled.</div>';
+   '<button class="btn ghost" id="demoBtn">Demo Account · One-Click Login</button>'+
+   '<div class="demo-hint">Instant simulated demo account — no sign-up needed.</div>';
  }
  $('#auth').innerHTML=html;
  refreshLandingProgramCards();
@@ -2612,8 +2634,7 @@ function enterApp(freshSignup){var u=user();
  if(!PORTAL_ADMIN&&isStaff(u)){DB.session=null;save();renderAuth('Staff accounts must sign in from the separate admin app.');return}
  $('#auth').style.display='none';$('#app').style.display='flex';
  applyTheme();applyLang();renderBNav();$('#bnav').style.display=PORTAL_ADMIN?'none':'';
- if(!PORTAL_ADMIN&&!ENGINE.base)toast('Trading API is not configured; all local trading is disabled.','wn');
- else if(!PORTAL_ADMIN&&!ENGINE.online)toast('Trading server is unavailable; orders are disabled.','wn');
+ if(!PORTAL_ADMIN&&ENGINE.base&&!ENGINE.online)toast('Trading server is unavailable; orders are disabled.','wn');
  if(freshSignup)toast('Welcome to Plutus','up');
  navGo(PORTAL_ADMIN?'admin':'charts');
  if(CLOUD.ok&&!DEMO_MODE)cloudPull().then(function(){renderView()})}
