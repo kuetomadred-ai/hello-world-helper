@@ -3206,7 +3206,7 @@ function bindReq(){
   if(!CLOUD.sb){toast('سجّل الدخول أولاً','dn');return}
   rc.disabled=true;
   CLOUD.sb.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s)throw new Error('سجّل الدخول أولاً');
-   return fetch((window.top&&window.top.location?window.top.location.origin:location.origin)+'/api/public/payments/invoice',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify({templateId:t.id})})})
+   var _o;try{_o=window.top.location.origin}catch(e){_o=location.origin}if(/localhost|^capacitor:/.test(_o)||!/^https?:/.test(_o))_o=String(window.PLUTUS_PAYMENTS_API_URL||_o).replace(/\/+$/,'');return fetch(_o+'/api/public/payments/invoice',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify({templateId:t.id})})})
   .then(function(res){if(!res.ok)return res.text().then(function(x){throw new Error(x||'تعذر إنشاء الفاتورة')});return res.json()})
   .then(function(d){(window.top||window).location.href=d.url})
   .catch(function(e){rc.disabled=false;toast(e.message,'dn')})};
