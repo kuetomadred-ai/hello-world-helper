@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: plutus-engine
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: SUPABASE_URL
+        value: https://jujjjvuspzfgrmeljljh.supabase.co
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://id-preview--da9e1081-8856-41b2-8b61-dc3067a0b712.lovable.app,capacitor://localhost,https://localhost,http://localhost
+      - key: BIQUOTE_URL
+        value: https://biquote.io
+      - key: ENGINE_SYMBOLS
+        value: EURUSD,GBPUSD,USDJPY,USDCHF,USDCAD,AUDUSD,NZDUSD,XAUUSD,XAGUSD,US500,USTEC,US30
