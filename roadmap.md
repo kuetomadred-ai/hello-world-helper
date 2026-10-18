@@ -14,4 +14,5 @@
 - [x] Existing Capacitor wrapping, deep links, and Android back handling; automated callback/scheme tests added
 - [ ] Installable Android/iOS release (blocked: no Android SDK/device or Xcode/device is available here; Capacitor sync and static deep-link checks pass)
 - [x] Global ESLint formatting errors fixed; lint has zero errors (six existing React Fast Refresh warnings remain)
-- [ ] 10 ready simulated 2-step $10,000 accounts linked to cloud trades + 24/7 monitor (blocked: user-owned email domain, approval to apply engine migration to live DB, Render deploy by user)
+- [x] 10 simulated 2-step $10,000 accounts created (cloud-synced)
+- [ ] Server engine tables + 24/7 monitor (blocked: user must run engine SQL in DB SQL editor and deploy on Render)
