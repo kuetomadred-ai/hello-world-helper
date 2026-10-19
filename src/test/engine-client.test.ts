@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const source = readFileSync(path.join(process.cwd(), "public/plotos/engine-client.js"), "utf8");
 
-describe("Plutus engine client module", () => {
+describe("PLUTUS engine client module", () => {
   it("accepts HTTPS origins and local HTTP only", () => {
     const window = { crypto: { randomUUID: () => "test-uuid" } };
     new Function("window", source)(window);

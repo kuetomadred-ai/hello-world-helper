@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -23,7 +22,7 @@ const loadCatalogue = new Function(
 const { PROP_PROGRAMS, BROKER_SIM_TEMPLATES, programTemplateRecords, challengeTargets } =
   loadCatalogue();
 
-describe("Plutus simulated funding catalogue", () => {
+describe("PLUTUS simulated funding catalogue", () => {
   it("provides the requested 2-step, 1-step, and direct tiers", () => {
     expect(PROP_PROGRAMS.map((program) => program.id)).toEqual([
       "prog_2step",

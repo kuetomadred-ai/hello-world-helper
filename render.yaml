@@ -14,7 +14,7 @@ services:
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: CORS_ORIGINS
-        value: https://id-preview--da9e1081-8856-41b2-8b61-dc3067a0b712.lovable.app,capacitor://localhost,https://localhost,http://localhost
+        value: http://localhost:5173,capacitor://localhost,https://localhost,http://localhost
       - key: BIQUOTE_URL
         value: https://biquote.io
       - key: ENGINE_SYMBOLS

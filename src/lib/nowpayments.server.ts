@@ -1,4 +1,4 @@
-// Server-only helpers for NOWPayments + the PLOTOS database.
+// Server-only helpers for NOWPayments and the PLUTUS database.
 export const PLOTOS_SB_URL = "https://jujjjvuspzfgrmeljljh.supabase.co";
 export const PLOTOS_SB_KEY = "sb_publishable_X9YRYOHzL1v0OVXF_KRjiw_EHj7kTdV";
 

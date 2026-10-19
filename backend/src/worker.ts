@@ -1,6 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { HubConnectionBuilder, HttpTransportType, LogLevel } from "@microsoft/signalr";
+import { pathToFileURL } from "node:url";
 import { parseEngineTick } from "./domain.js";
+import { setEngineStatus } from "./runtime-state.js";
 
 const required = (name: string) => {
   const value = process.env[name];
@@ -62,8 +64,16 @@ async function loadInstruments() {
   return rows.map((x) => x.symbol);
 }
 
-async function main() {
-  const symbols = await loadInstruments();
+export async function startWorker() {
+  stopping = false;
+  setEngineStatus("starting");
+  let symbols: string[];
+  try {
+    symbols = await loadInstruments();
+  } catch (error) {
+    setEngineStatus("error", error);
+    throw error;
+  }
   const symbolSet = new Set(symbols);
   console.info(`Loaded ${symbols.length} server-valued instruments`);
   const connection = new HubConnectionBuilder()
@@ -74,6 +84,7 @@ async function main() {
     .withAutomaticReconnect([1000, 2000, 5000, 10000, 30000])
     .configureLogging(LogLevel.Warning)
     .build();
+
   const onTick = async (tick: unknown) => {
     if (stopping || !tick) return;
     const quote = parseEngineTick(tick, symbolSet);
@@ -82,35 +93,75 @@ async function main() {
     const now = Date.now();
     if (now - (seen.get(symbol) ?? 0) < minTickIntervalMs) return;
     seen.set(symbol, now);
-    const { error } = await supabase.rpc("pf_engine_process_tick", {
-      p_symbol: symbol,
-      p_bid: bid,
-      p_ask: ask,
-      p_quote_at: quoteAt.toISOString(),
-    });
-    if (error) console.error("tick rejected", symbol, error.message);
+    try {
+      const { error } = await supabase.rpc("pf_engine_process_tick", {
+        p_symbol: symbol,
+        p_bid: bid,
+        p_ask: ask,
+        p_quote_at: quoteAt.toISOString(),
+      });
+      if (error) console.error("tick rejected", symbol, error.message);
+    } catch (error) {
+      console.error("tick processing failed", symbol, error);
+    }
   };
+
   connection.on("ReceiveTick", onTick);
   connection.on("Tick", onTick);
-  connection.onreconnected(async () => {
-    await connection.invoke("Subscribe", symbols);
-    console.info("Biquote reconnected");
+  connection.onreconnecting((error) => setEngineStatus("reconnecting", error));
+  connection.onreconnected(() => {
+    void connection
+      .invoke("Subscribe", symbols)
+      .then(() => {
+        setEngineStatus("connected");
+        console.info("Biquote reconnected");
+      })
+      .catch((error) => {
+        setEngineStatus("reconnecting", error);
+        console.error("Biquote resubscribe failed", error);
+      });
   });
   connection.onclose((error) => {
-    if (!stopping) console.error("Biquote disconnected", error?.message);
+    if (!stopping) {
+      setEngineStatus("disconnected", error);
+      console.error("Biquote disconnected", error?.message);
+    }
   });
-  await connection.start();
-  await connection.invoke("Subscribe", symbols);
-  console.info(`Server-side paper engine running; broker execution is disabled`);
-  const stop = async () => {
+
+  setEngineStatus("connecting");
+  try {
+    await connection.start();
+    await connection.invoke("Subscribe", symbols);
+    setEngineStatus("connected");
+  } catch (error) {
+    setEngineStatus("error", error);
+    await connection.stop().catch(() => undefined);
+    throw error;
+  }
+  console.info("Server-side paper engine running; broker execution is disabled");
+
+  return async () => {
+    if (stopping) return;
     stopping = true;
-    await connection.stop();
-    process.exit(0);
+    setEngineStatus("stopping");
+    try {
+      await connection.stop();
+    } finally {
+      setEngineStatus("disconnected");
+    }
   };
-  process.once("SIGINT", stop);
-  process.once("SIGTERM", stop);
 }
-main().catch((error) => {
-  console.error("Engine startup failed", error);
-  process.exitCode = 1;
-});
+
+async function main() {
+  const stop = await startWorker();
+  process.once("SIGINT", () => void stop());
+  process.once("SIGTERM", () => void stop());
+}
+
+const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isDirectRun) {
+  main().catch((error) => {
+    console.error("Engine startup failed", error);
+    process.exitCode = 1;
+  });
+}

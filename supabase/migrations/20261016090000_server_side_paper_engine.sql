@@ -78,19 +78,39 @@ create table if not exists public.pf_engine_ledger (
   created_at timestamptz not null default now()
 );
 create index if not exists pf_engine_ledger_account_idx on public.pf_engine_ledger(account_id,created_at desc);
+create table if not exists public.pf_engine_trades_history (
+  id uuid primary key default gen_random_uuid(),
+  position_id uuid references public.pf_engine_positions(id) on delete set null,
+  user_id uuid not null references auth.users(id) on delete restrict,
+  account_id text not null references public.pf_engine_accounts(id) on delete restrict,
+  symbol text not null references public.pf_engine_instruments(symbol),
+  side text not null check (side in ('buy','sell')),
+  lots numeric(10,2) not null check (lots between 0.01 and 100),
+  entry_price numeric(24,12) not null check (entry_price > 0),
+  exit_price numeric(24,12) not null check (exit_price > 0),
+  realized_pnl numeric(18,2) not null,
+  close_reason text not null check (close_reason in ('MANUAL','SL','TP','PARTIAL')),
+  opened_at timestamptz not null,
+  closed_at timestamptz not null default now()
+);
+create index if not exists pf_engine_trades_history_owner_idx
+  on public.pf_engine_trades_history(user_id,closed_at desc);
+create index if not exists pf_engine_trades_history_account_idx
+  on public.pf_engine_trades_history(account_id,closed_at desc);
 
 -- Users can read only their engine data; all writes go through trusted service RPCs.
 do $$ declare t text; begin
-  foreach t in array array['pf_engine_instruments','pf_engine_accounts','pf_engine_quotes','pf_engine_orders','pf_engine_positions','pf_engine_ledger'] loop
+  foreach t in array array['pf_engine_instruments','pf_engine_accounts','pf_engine_quotes','pf_engine_orders','pf_engine_positions','pf_engine_ledger','pf_engine_trades_history'] loop
     execute format('alter table public.%I enable row level security',t);
     execute format('revoke all on public.%I from anon, authenticated',t);
   end loop;
 end $$;
-grant select on public.pf_engine_accounts,public.pf_engine_orders,public.pf_engine_positions,public.pf_engine_ledger to authenticated;
+grant select on public.pf_engine_accounts,public.pf_engine_orders,public.pf_engine_positions,public.pf_engine_ledger,public.pf_engine_trades_history to authenticated;
 create policy pf_engine_account_owner_read on public.pf_engine_accounts for select to authenticated using (user_id=(select auth.uid()));
 create policy pf_engine_order_owner_read on public.pf_engine_orders for select to authenticated using (user_id=(select auth.uid()));
 create policy pf_engine_position_owner_read on public.pf_engine_positions for select to authenticated using (user_id=(select auth.uid()));
 create policy pf_engine_ledger_owner_read on public.pf_engine_ledger for select to authenticated using (user_id=(select auth.uid()));
+create policy pf_engine_history_owner_read on public.pf_engine_trades_history for select to authenticated using (user_id=(select auth.uid()));
 
 -- Trusted service-role only. Callers must authenticate at the API and pass the verified auth.users id.
 create or replace function public.pf_engine_place_order(
@@ -146,6 +166,8 @@ begin
  pnl:=round(((px-p.entry_price)/i.tick_size*i.tick_value*p.lots*case when p.side='buy' then 1 else -1 end)::numeric,2);
  update public.pf_engine_positions set status='CLOSED',closed_at=now(),exit_price=px,realized_pnl=pnl,close_reason='MANUAL' where id=p.id returning * into p;
  update public.pf_engine_accounts set balance=balance+pnl,updated_at=now() where id=a.id returning * into a;
+ insert into public.pf_engine_trades_history(position_id,user_id,account_id,symbol,side,lots,entry_price,exit_price,realized_pnl,close_reason,opened_at,closed_at)
+ values(p.id,p.user_id,p.account_id,p.symbol,p.side,p.lots,p.entry_price,p.exit_price,p.realized_pnl,p.close_reason,p.opened_at,p.closed_at);
  insert into public.pf_engine_ledger(request_id,account_id,user_id,position_id,event,amount,balance_after,details) values(p_request_id,a.id,p_user_id,p.id,'POSITION_CLOSED',pnl,a.balance,jsonb_build_object('price',px,'symbol',p.symbol,'lots',p.lots,'side',p.side,'entry',p.entry_price));
  return jsonb_build_object('position',to_jsonb(p),'account',jsonb_build_object('id',a.id,'balance',a.balance),'pnl',pnl,'price',px);
 end $$;
@@ -169,6 +191,8 @@ begin
      if p.stop_loss is not null and ((p.side='buy' and p_bid<=p.stop_loss) or (p.side='sell' and p_ask>=p.stop_loss)) then px:=p.stop_loss; else px:=p.take_profit; end if;
      pnl:=round(((px-p.entry_price)/i.tick_size*i.tick_value*p.lots*case when p.side='buy' then 1 else -1 end)::numeric,2);
      update public.pf_engine_positions set status='CLOSED',closed_at=now(),exit_price=px,realized_pnl=pnl,close_reason=case when px=p.stop_loss then 'SL' else 'TP' end where id=p.id;
+     insert into public.pf_engine_trades_history(position_id,user_id,account_id,symbol,side,lots,entry_price,exit_price,realized_pnl,close_reason,opened_at,closed_at)
+     values(p.id,p.user_id,p.account_id,p.symbol,p.side,p.lots,p.entry_price,px,pnl,case when px=p.stop_loss then 'SL' else 'TP' end,p.opened_at,now());
      update public.pf_engine_accounts set balance=balance+pnl,updated_at=now() where id=p.account_id returning * into a;
      insert into public.pf_engine_ledger(account_id,user_id,position_id,event,amount,balance_after,details) values(p.account_id,p.user_id,p.id,'POSITION_CLOSED',pnl,a.balance,jsonb_build_object('price',px,'reason',case when px=p.stop_loss then 'SL' else 'TP' end)); n:=n+1;
    end if;
@@ -243,6 +267,8 @@ begin
  pnl:=round(((px-p.entry_price)/i.tick_size*i.tick_value*p_close_lots*case when p.side='buy' then 1 else -1 end)::numeric,2);
  update public.pf_engine_positions set lots=remain where id=p.id;
  update public.pf_engine_accounts set balance=balance+pnl,updated_at=now() where id=a.id returning * into a;
+ insert into public.pf_engine_trades_history(position_id,user_id,account_id,symbol,side,lots,entry_price,exit_price,realized_pnl,close_reason,opened_at,closed_at)
+ values(p.id,p.user_id,p.account_id,p.symbol,p.side,p_close_lots,p.entry_price,px,pnl,'PARTIAL',p.opened_at,now());
  insert into public.pf_engine_ledger(request_id,account_id,user_id,position_id,event,amount,balance_after,details)
  values(p_request_id,a.id,p_user_id,p.id,'POSITION_PARTIAL_CLOSE',pnl,a.balance,jsonb_build_object('price',px,'symbol',p.symbol,'lots',p_close_lots,'side',p.side,'entry',p.entry_price));
  return jsonb_build_object('position_id',p.id,'closed_lots',p_close_lots,'remaining_lots',remain,'pnl',pnl,'balance',a.balance,'price',px);

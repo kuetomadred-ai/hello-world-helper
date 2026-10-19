@@ -33,13 +33,13 @@ describe("Capacitor security and auth links", () => {
     expect(app).toContain("com.plutus.trading:");
   });
 
-  it("uses Plutus branding and preserves the existing web URL", () => {
+  it("uses PLUTUS branding and preserves the existing web URL", () => {
     expect(capacitorConfig).toEqual(
-      expect.objectContaining({ appName: "Plutus", appId: "com.plutus.trading" }),
+      expect.objectContaining({ appName: "PLUTUS", appId: "com.plutus.trading" }),
     );
-    expect(app).toContain("<title>Plutus</title>");
-    expect(androidStrings).toContain('<string name="app_name">Plutus</string>');
-    expect(iosInfo).toMatch(/CFBundleDisplayName<\/key>\s*<string>Plutus<\/string>/);
+    expect(app).toContain("<title>PLUTUS</title>");
+    expect(androidStrings).toContain('<string name="app_name">PLUTUS</string>');
+    expect(iosInfo).toMatch(/CFBundleDisplayName<\/key>\s*<string>PLUTUS<\/string>/);
     expect(rootRoute).toContain('src="/plotos/index.html"');
     expect(app).toContain("window.location.origin+'/plotos/'");
   });

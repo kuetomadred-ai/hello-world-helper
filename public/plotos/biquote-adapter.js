@@ -1,4 +1,4 @@
-/* Biquote is the sole market-data provider for Plutus. */
+/* Biquote is the sole market-data provider for PLUTUS. */
 (function (global) {
   "use strict";
 

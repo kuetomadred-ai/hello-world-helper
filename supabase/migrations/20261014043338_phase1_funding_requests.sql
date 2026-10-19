@@ -1,4 +1,4 @@
--- Plutus staged security migration — additive only.
+-- PLUTUS staged security migration — additive only.
 -- Applied to the live project on 2026-10-14 after explicit user approval.
 -- It does not alter pf_users_data, legacy audit policies, or current client sync.
 

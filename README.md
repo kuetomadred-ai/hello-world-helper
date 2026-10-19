@@ -1,24 +1,14 @@
-# Hello World Helper
+# PLUTUS
 
-مرحبا
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/da9e1081-8856-41b2-8b61-dc3067a0b712).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+Mobile-ready simulated trading platform.
 
 ## Development and CI
 
 Use **Bun 1.4.3** as the canonical package manager; the repository tracks `bun.lock` (and `backend/bun.lock`). Do not run `npm install` because no npm lockfile is maintained. Node.js 22+ is also required by build tools.
 
 ```sh
-git clone https://github.com/kuetomadred-ai/trade-buddy-evolution.git
-cd trade-buddy-evolution
+git clone https://github.com/kuetomadred-ai/hello-world-helper.git
+cd hello-world-helper
 bun install --frozen-lockfile
 bun run dev
 ```
@@ -34,9 +24,9 @@ cd backend && bun install --frozen-lockfile && bun run typecheck && bun run test
 
 ## Capacitor (Android and iOS)
 
-The mobile wrapper packages the existing Plutus page from `public/plotos/` as a local web app. The native projects load bundled assets; no remote development server is configured.
+The mobile wrapper packages the existing PLUTUS page from `public/plotos/` as a local web app. The native projects load bundled assets; no remote development server is configured.
 
-The native app ID is `com.plutus.trading`. The existing `/plotos/` web path and legacy local-storage keys remain unchanged for backward compatibility; the app display name, native identifiers, and auth callback use Plutus.
+The native app ID is `com.plutus.trading`. The existing `/plotos/` web path and legacy local-storage keys remain unchanged for backward compatibility; the app display name, native identifiers, and auth callback use PLUTUS.
 
 Requirements: Node.js 22 or newer, Android Studio with an Android SDK for Android builds, and macOS with Xcode 26 or newer for iOS builds. iOS projects can be prepared in this repository, but compiling and signing them requires macOS and Xcode.
 
@@ -46,13 +36,13 @@ The Android and iOS native project folders are included in this repository. Afte
 bun install --frozen-lockfile
 ```
 
-Build the web app, stage the Plutus page in Capacitor's `dist/` directory, and sync both native projects:
+Build the web app, stage the PLUTUS page in Capacitor's `dist/` directory, and sync both native projects:
 
 ```sh
 bun run mobile:sync
 ```
 
-Run `bun run mobile:build` alone only when you want to prepare `dist/` without syncing native projects. Use `bunx cap add android` or `bunx cap add ios` only if the corresponding native folder has been removed and needs to be regenerated. Native icons and launch screens use the existing `public/favicon.ico` mark; regenerate them with `python3 scripts/generate-mobile-brand-assets.py` (requires Pillow).
+Run `bun run mobile:build` alone only when you want to prepare `dist/` without syncing native projects. Use `bunx cap add android` or `bunx cap add ios` only if the corresponding native folder has been removed and needs to be regenerated. Native icons and launch screens use the existing `public/plotos/assets/mt5-app-icon.png` mark; regenerate them with `python3 scripts/generate-mobile-brand-assets.py` (requires Pillow).
 
 Open one platform in its native IDE after syncing:
 
@@ -70,3 +60,14 @@ Native Supabase sessions use iOS Keychain / Android Keystore via `@aparajita/cap
 ### Mobile email confirmation
 
 The native projects register the `com.plutus.trading://auth/callback` URL scheme, and the mobile build handles Supabase confirmation links sent to that URI. In the Supabase Dashboard, add the exact URI under **Authentication → URL Configuration → Redirect URLs** before testing signup or resend-confirmation on a device. For production, prefer Universal Links/App Links on a domain you own; domain association and release signing must be configured for that domain.
+
+
+## Server-side trading engine and NOWPayments
+
+The Fastify API and Biquote worker are in `backend/`; the single-process entrypoint is `bun run start`. Trading is simulated only. The engine migration at `supabase/migrations/20261016090000_server_side_paper_engine.sql` is tracked locally and was **not applied** to the live database in this update.
+
+NOWPayments invoice and webhook routes remain under `src/routes/api/public/payments/`. The webhook records payment status but does not auto-approve funding or grant an account. Keep `NOWPAYMENTS_API_KEY`, `NOWPAYMENTS_IPN_SECRET`, `PLOTOS_SERVICE_ROLE_KEY`, and Supabase service-role keys server-side only.
+
+`public/plotos/engine-config.js` currently leaves the engine API URL blank, so trading remains disabled until a backend is deployed and configured. Web invoice calls use the application origin; native builds require `PLUTUS_PAYMENTS_API_URL` to point at the HTTPS application server. Supabase Auth also needs `com.plutus.trading://auth/callback` in its redirect URL allowlist.
+
+Render's free web service is for best-effort testing and sleeps after inactivity; it does not provide reliable 24/7 market monitoring. Do not use periodic pings as a keep-alive workaround.

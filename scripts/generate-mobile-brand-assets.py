@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Generate native app icons and launch images from the repository favicon."""
+"""Generate web and native app icons and launch images from the approved MT5 icon."""
 
 from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "public" / "favicon.ico"
+SOURCE = ROOT / "public" / "plotos" / "assets" / "mt5-app-icon.png"
 BACKGROUND = (8, 12, 22, 255)
 RESAMPLE = Image.Resampling.LANCZOS
 
@@ -13,6 +13,7 @@ if not SOURCE.exists():
     raise SystemExit(f"Brand source image not found: {SOURCE}")
 
 mark = Image.open(SOURCE).convert("RGBA")
+mark.save(ROOT / "public" / "favicon.ico", format="ICO", sizes=[(16, 16), (32, 32), (48, 48), (256, 256)])
 
 
 def make_canvas(width, height, mark_side, transparent=False):
@@ -52,4 +53,4 @@ for path in (ROOT / "ios/App/App/Assets.xcassets/Splash.imageset").glob("splash*
     mark_side = max(1, round(min(width, height) * 0.38))
     make_canvas(width, height, mark_side).convert("RGB").save(path, optimize=True)
 
-print("Generated native icon and launch assets from public/favicon.ico")
+print("Generated web and native icon and launch assets from public/plotos/assets/mt5-app-icon.png")

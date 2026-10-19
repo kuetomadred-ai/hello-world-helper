@@ -1,11 +1,9 @@
-# نشر خادم Plutus مجاناً (Render)
+# نشر محرك PLUTUS
 
-1. **قاعدة البيانات (مرة واحدة):** افتح SQL Editor في لوحة قاعدة البيانات، الصق محتوى
-   `supabase/migrations/20261016090000_server_side_paper_engine.sql` ونفّذه (يفضّل تجربته على نسخة اختبار أولاً).
-2. **Render:** New → Blueprint → اختر مستودع GitHub. سيقرأ `render.yaml` تلقائياً.
-   أدخل القيم السرية عند الطلب: `SUPABASE_ANON_KEY` و`SUPABASE_SERVICE_ROLE_KEY` (مفتاح جديد بعد التدوير).
-3. **الربط:** بعد النشر انسخ الرابط (مثل `https://plutus-engine.onrender.com`) وضعه في
-   `public/plotos/engine-config.js` → `window.PLUTUS_ENGINE_API_URL`.
-4. **تحقق:** افتح `<الرابط>/health` يجب أن يرد بنجاح.
+1. **قاعدة البيانات:** ملف migration موجود في `supabase/migrations/20261016090000_server_side_paper_engine.sql`، لكنه لم يُطبّق على قاعدة البيانات في هذا التحديث. لا تنفّذه على الإنتاج دون مراجعة منفصلة وموافقة صريحة؛ لا يتغير المخطط السحابي تلقائيًا بمجرد رفع الكود.
+2. **Render:** أنشئ Blueprint من المستودع واقرأ `render.yaml`. أدخل `SUPABASE_ANON_KEY` و`SUPABASE_SERVICE_ROLE_KEY` في لوحة الاستضافة فقط، ولا تحفظ قيمهما في GitHub أو ملفات الواجهة.
+3. **الأصول وCORS:** بعد نشر الواجهة، أضف أصلها الفعلي إلى `CORS_ORIGINS` إلى جانب أصول Capacitor. اضبط `public/plotos/engine-config.js` على أصل المحرك المنشور عبر `PLUTUS_ENGINE_API_URL`.
+4. **NOWPayments:** يعمل الويب على مسار الفواتير من أصل التطبيق نفسه. يحتاج تطبيق الهاتف إلى `PLUTUS_PAYMENTS_API_URL` يشير إلى خادم HTTPS الذي يخدم `/api/public/payments/*`. تبقى مفاتيح NOWPayments وأسرار webhook على الخادم فقط.
+5. **الصحة:** اختبر `/health`، ثم تحقق من اتصال Biquote ومن أن حسابات المستخدمين وRLS والـRPCs تعمل بعد تطبيق migration على بيئة اختبار معتمدة.
 
-ملاحظة: الخطة المجانية في Render تنام بعد 15 دقيقة بلا طلبات؛ استخدم مراقِباً مجانياً (مثل UptimeRobot) يطلب `/health` كل 5 دقائق لإبقائه يعمل.
+**حدّ مهم:** خدمة Render المجانية تنام بعد 15 دقيقة دون طلبات واردة. لذلك لا تضمن تشغيل عامل الأسعار 24/7، ولا تستخدم خدمة ping لإبقائها مستيقظة. يمكن استعمالها للاختبار فقط؛ التشغيل المتواصل يحتاج استضافة دائمة التشغيل.

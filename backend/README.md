@@ -1,13 +1,13 @@
 # خادم ومحرك التداول المحاكى
 
-هذا مسار backend منفصل عن واجهة التداول القديمة. التنفيذ **محاكاة فقط**؛ لا توجد واجهة لإرسال أوامر إلى وسيط. قاعدة البيانات هي مصدر حقيقة الحساب والصفقات، وتأتي الأسعار من Biquote على الخادم. لا تضع `SUPABASE_SERVICE_ROLE_KEY` في تطبيق الهاتف أو الويب.
+محرك PLUTUS يعمل على الخادم باستخدام Fastify وSupabase وBiquote SignalR. التداول **محاكاة فقط**؛ لا توجد واجهة لإرسال أوامر إلى وسيط. لا تضع `SUPABASE_SERVICE_ROLE_KEY` في تطبيق الهاتف أو الويب.
 
 ## المتطلبات
 
-- Node.js 22+
-- Supabase URL + anon key + service-role key (الخادمي فقط)
-- السماح لشبكة/خادم التشغيل بالاتصال بـBiquote SignalR
-- تطبيق migration `supabase/migrations/20261016090000_server_side_paper_engine.sql` **أولاً على staging** بعد مراجعة المخطط والبيانات وخطة الرجوع.
+- Bun 1.4.3 وNode.js 22+.
+- `SUPABASE_URL` و`SUPABASE_ANON_KEY` و`SUPABASE_SERVICE_ROLE_KEY` (الأخير للخادم فقط).
+- اتصال صادر إلى Biquote SignalR.
+- ملف migration للمحرك موجود في `supabase/migrations/20261016090000_server_side_paper_engine.sql`. **لم يُطبّق هذا التحديث أي تغيير على قاعدة Supabase السحابية.** راجع المخطط واختبر migration على staging بعد موافقة منفصلة قبل تطبيقها على أي قاعدة.
 
 ## التشغيل المحلي
 
@@ -16,34 +16,29 @@ cd backend
 bun install --frozen-lockfile
 cp .env.example .env
 bun run typecheck
-bun test
-bun run api
-# في عملية ثانية بعد تجهيز قاعدة البيانات:
-bun run worker
+bun run test
+bun run start
 ```
 
-المتغيرات موجودة في `.env.example`. `CORS_ORIGINS` قائمة مضيفي الواجهة مفصولة بفواصل. `ENGINE_SYMBOLS` قائمة allowlist؛ يرفض العامل الأدوات التي لا يعيد مزود السعر لها tick size وtick value موجبَين.
+`start` يشغّل REST API وعامل Biquote في عملية واحدة ويغلقهما معًا عند الإيقاف. للتطوير المنفصل فقط يمكن تشغيل `bun run api` و`bun run worker`. المتغيرات موثقة في `.env.example`. `CORS_ORIGINS` قائمة أصول الواجهة مفصولة بفواصل، و`ENGINE_SYMBOLS` قائمة الأدوات المسموح بها.
 
-## API الحالي
+## API
 
 - `GET /health`
-- `GET /v1/accounts` و`GET /v1/accounts/:id/state` — يقرآن حسابات المستخدم الموثق فقط.
-- `POST /v1/admin/accounts` — يتطلب مستخدم ADMIN موثقاً؛ يمنح حساب محاكاة لمستخدم ومفتاح حساب معتمدين.
-- `POST /v1/orders` — يتطلب `Authorization: Bearer <Supabase access token>` و`accountId, requestId, symbol, side, type, lots`؛ `requestId` مفتاح idempotency.
-- `POST /v1/positions/:id/close` و`/close-partial` — الإغلاق بسعر Biquote الخادمي مع حد الاحتفاظ الأدنى.
-- `POST /v1/positions/:id/protection` — تعديل SL/TP بعد تحقق الخادم من السعر.
-- `POST /v1/orders/:id/modify` و`/cancel` — تعديل/إلغاء أوامر المستخدم المعلقة فقط.
+- `GET /v1/accounts` و`GET /v1/accounts/:id/state` — حسابات المستخدم الموثق فقط؛ تتضمن الحالة سجل الصفقات المغلقة والجزئية.
+- `POST /v1/admin/accounts` — يتطلب مستخدم ADMIN موثقًا.
+- `POST /v1/orders` — يتطلب رمز Supabase صالحًا و`accountId`, `requestId`, `symbol`, `side`, `type`, `lots`؛ `requestId` مفتاح idempotency.
+- `POST /v1/positions/:id/close` و`/close-partial`، و`POST /v1/positions/:id/protection`.
+- `POST /v1/orders/:id/modify` و`/cancel` — لأوامر المستخدم المعلقة فقط.
 
-الخادم يتحقق من الجلسة عبر Supabase Auth ثم ينفذ RPC بصلاحيات الخدمة. لا يقبل سعر تنفيذ من العميل. العامل الدائم يشترك في بث Biquote ويستدعي RPC ذرياً لمراقبة SL/TP وتشغيل LIMIT/STOP.
+يتحقق الخادم من جلسة المستخدم وينفذ عمليات قاعدة البيانات عبر RPC بصلاحيات الخادم؛ لا يقبل سعر تنفيذ من العميل. يتابع العامل أسعار Biquote ويعالج SL/TP والأوامر المعلقة. سجل الإغلاق يحفظه جدول `pf_engine_trades_history` عند تطبيق migration.
 
-## ربط واجهة Plutus
+## Render
 
-قبل نشر العميل، اضبط `window.PLUTUS_ENGINE_API_URL` في `public/plotos/engine-config.js` إلى origin الخاص بالخادم، ثم أضف origin الواجهة إلى `CORS_ORIGINS` في backend. لا تضع أي مفتاح خادمي في ملف الواجهة. عميل Plutus يقرأ الحسابات والصفقات من `/v1/accounts`، ويرسل الأوامر والإغلاق والتعديلات إلى API؛ لا يقرأ أو يكتب حقول الحسابات/الصفقات/الأوامر/السجل القديمة في `pf_users_data`. يستخدم جدول JSON القديم فقط للإعدادات والبيانات المساندة، مع إبقاء الحقول التاريخية كما هي دون استهلاكها للتنفيذ. تفضيلات الرسم تظل محلية. إذا غاب URL أو تعطل الخادم، تتوقف أوامر الواجهة ولا تعود إلى محرك محلي.
+`render.yaml` و`Dockerfile` يجهزان خدمة ويب للاختبار. أدخل مفاتيح Supabase في لوحة الاستضافة فقط. خدمة Render المجانية تنام بعد 15 دقيقة بلا طلبات واردة، لذلك لا توفر مراقبة أسعار موثوقة على مدار 24/7؛ لا تستخدم طلبات ping للتحايل على ذلك.
 
-## حدود الإصدار الأول
+## ربط الواجهة والحدود
 
-1. تداول الحسابات من نوع `PAPER` وفتح/إغلاق/تعديل المراكز والأوامر يمر عبر API الخادمي؛ لا يُعتمد سجل التداول المحلي القديم كمصدر للحقيقة.
-2. طلب التمويل يستخدم RPC `pf_create_funding_request` الموثوق. خصم رسوم البرنامج من المحفظة **معطل** إلى أن تنتقل المحفظة إلى دفتر خادمي ذري؛ لا تعتمد الأرصدة المحلية القديمة.
-3. لا يوجد استيراد تلقائي لأرصدة أو حسابات `pf_users_data.blob`؛ أي ترحيل يتطلب مطابقة واعتماداً إدارياً موثقاً.
-4. ملفات SQL محلية؛ لم يتم في هذه البيئة التحقق من المخطط المنشور أو تطبيق migration محرك التداول على Supabase. اختبرها على staging أولاً، ثم اختبر فصل بيانات مستخدمين مختلفين.
-5. العامل يحتاج اتصالاً دائماً. اختبر أسعار كل أداة وسياسة انقطاع السعر والهوامش والتزامن قبل إتاحة الحسابات. المحرك محاكاة فقط وليس لإرسال أوامر مالية حقيقية.
+اضبط `window.PLUTUS_ENGINE_API_URL` في `public/plotos/engine-config.js` إلى أصل المحرك بعد نشره، ثم أضف أصل الواجهة إلى `CORS_ORIGINS`. قيمة الإعداد فارغة حاليًا، لذا لا تُرسل الواجهة أوامر تداول حتى يُنشر الخادم ويُربط. إذا غاب الخادم أو تعذر الاتصال به، يفشل التنفيذ مغلقًا ولا يعود إلى محرك محلي.
+
+طلبات NOWPayments تظل ضمن خادم تطبيق الواجهة في `src/routes/api/public/payments/`، وليست ضمن هذا المحرك. لا تُدرج أسرار الدفع أو مفاتيح الخدمة في ملفات الواجهة أو Git.
