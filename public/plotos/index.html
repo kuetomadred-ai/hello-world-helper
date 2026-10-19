@@ -991,11 +991,16 @@ function engineRefresh(){
    (s.orders||[]).forEach(function(o){orders.push({id:o.id,clid:o.id,accId:aid,userId:u.id,symbol:o.symbol,side:o.side,type:o.order_type,lots:+o.lots,price:o.trigger_price==null?null:+o.trigger_price,sl:o.stop_loss,tp:o.take_profit,state:o.status,reason:o.reason,createdAt:Date.parse(o.created_at)||Date.now(),log:[]})});
    (s.ledger||[]).forEach(function(l){if(l.event==='POSITION_PARTIAL_CLOSE'){var d=l.details||{};history.push({id:'ledger-'+l.id,accId:aid,userId:u.id,symbol:d.symbol||'',side:d.side||'',lots:+d.lots||0,entry:+d.entry||0,exit:+d.price||0,pnl:+l.amount||0,comm:0,reason:'partial',note:'',openedAt:Date.parse(l.created_at)||Date.now(),closedAt:Date.parse(l.created_at)||Date.now()})}});
   });
-  DB.accounts=DB.accounts.filter(function(a){return a.userId!==u.id}).concat(accounts);
-  DB.positions=DB.positions.filter(function(p){return p.userId!==u.id}).concat(positions);
-  DB.orders=DB.orders.filter(function(o){return o.userId!==u.id}).concat(orders);
-  DB.history=DB.history.filter(function(h){return h.userId!==u.id}).concat(history);
-  if(accountIds.indexOf(DB.activeAcc[u.id])<0)DB.activeAcc[u.id]=accountIds[0]||null;
+  // Keep locally/cloud-synced accounts (e.g. funded PROP) that the server engine does not manage.
+  var srvIds={};accountIds.forEach(function(id){srvIds[id]=1});
+  var keepAcc=function(a){return a.userId!==u.id||(!a.serverManaged&&!srvIds[a.id])};
+  var keepRow=function(x){return x.userId!==u.id||(!srvIds[x.accId]&&x.src!=='server'&&DB.accounts.some(function(a){return a.id===x.accId&&keepAcc(a)}))};
+  DB.positions=DB.positions.filter(keepRow).concat(positions);
+  DB.orders=DB.orders.filter(keepRow).concat(orders);
+  DB.history=DB.history.filter(keepRow).concat(history);
+  DB.accounts=DB.accounts.filter(keepAcc).concat(accounts);
+  var myIds=DB.accounts.filter(function(a){return a.userId===u.id&&a.status!=='CLOSED'}).map(function(a){return a.id});
+  if(myIds.indexOf(DB.activeAcc[u.id])<0)DB.activeAcc[u.id]=myIds[0]||null;
   ENGINE.online=true;ENGINE.ready=true;ENGINE.lastError=null;CLOUD.online=true;
 	  if(view!=='auth'&&view!=='admin'&&!$('#ovl').classList.contains('on')){renderStrip();if(view==='trade')paintTrade(true);if(view==='hist')renderHist();if(view==='charts'){chartDrawLines();renderChartPositionBar()}}
   return true;
