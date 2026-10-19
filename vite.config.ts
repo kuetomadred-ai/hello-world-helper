@@ -41,7 +41,7 @@ export default defineConfig(({ command }) => ({
       importProtection,
       server: { entry: "server" },
     }),
-    ...(command === "build" ? [nitro({ defaultPreset: "cloudflare-module" })] : []),
+    ...(command === "build" ? [nitro({ defaultPreset: "cloudflare-module", output: { dir: "dist" } })] : []),
     react(),
   ],
   server: { host: "::", port: 8080 },
