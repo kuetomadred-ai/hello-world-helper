@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const projectRoot = process.cwd();
 const indexHtml = readFileSync(path.join(projectRoot, "public/plotos/index.html"), "utf8");
-const marker = "/* Biquote is the sole market-data provider for PLUTUS. */";
+const marker = "/* Biquote is the sole market-data provider for Plutus. */";
 const inlineStart = indexHtml.indexOf(marker);
 const inlineEnd = indexHtml.indexOf("</script>", inlineStart);
 const inlineAdapter =

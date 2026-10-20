@@ -1,8 +1,6 @@
 import Fastify, { type FastifyReply, type FastifyRequest } from "fastify";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import { pathToFileURL } from "node:url";
-import { getEngineStatus } from "./runtime-state.js";
 import { orderPayloadSchema } from "./domain.js";
 
 const env = (name: string) => {
@@ -69,8 +67,7 @@ function rpcError(error: { message: string; code?: string }) {
 app.get("/health", async () => ({
   ok: true,
   service: "paper-trading-api",
-  brokerConnected: getEngineStatus().brokerConnected,
-  engineStatus: getEngineStatus().status,
+  brokerConnected: false,
 }));
 app.post("/v1/admin/accounts", async (request, reply) => {
   const user = await requireUser(request, reply);
@@ -261,7 +258,6 @@ app.get("/v1/accounts/:id/state", async (request, reply) => {
     { data: positions, error: pErr },
     { data: orders, error: oErr },
     { data: ledger, error: lErr },
-    { data: history, error: hErr },
   ] = await Promise.all([
     adminClient
       .from("pf_engine_positions")
@@ -288,26 +284,10 @@ app.get("/v1/accounts/:id/state", async (request, reply) => {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(500),
-    adminClient
-      .from("pf_engine_trades_history")
-      .select(
-        "id,position_id,symbol,side,lots,entry_price,exit_price,realized_pnl,close_reason,opened_at,closed_at",
-      )
-      .eq("account_id", account.id)
-      .eq("user_id", user.id)
-      .order("closed_at", { ascending: false })
-      .limit(500),
   ]);
-  if (pErr || oErr || lErr || hErr)
-    return reply.code(503).send({ error: "Trading state unavailable" });
-  return { account, positions, orders, ledger, history };
+  if (pErr || oErr || lErr) return reply.code(503).send({ error: "Trading state unavailable" });
+  return { account, positions, orders, ledger };
 });
 
-export async function startApi() {
-  const port = Number(process.env.PORT ?? 3000);
-  await app.listen({ host: "0.0.0.0", port });
-  return app;
-}
-
-const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-if (isDirectRun) await startApi();
+const port = Number(process.env.PORT ?? 8787);
+await app.listen({ host: "0.0.0.0", port });

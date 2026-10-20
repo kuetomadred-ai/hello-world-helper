@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>PLUTUS</title>
+<title>Plutus</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"Plutus","short_name":"Plutus","start_url":".","display":"standalone","background_color":"%23000000","theme_color":"%23000000","description":"Professional prop trading platform."}'>
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" href="./assets/mt5-app-icon.png">
 <link rel="apple-touch-icon" href="./assets/mt5-app-icon.png">
@@ -13,7 +14,7 @@
 <script src="./engine-client.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 <script>
-/* Biquote is the sole market-data provider for PLUTUS. */
+/* Biquote is the sole market-data provider for Plutus. */
 (function (global) {
   'use strict';
 
@@ -620,7 +621,7 @@ html[dir="rtl"] #drawer{left:auto;right:0;transform:translateX(102%);border-righ
 .lp-qh{padding:22px 16px 10px;font-weight:700;font-size:17px;border-bottom:1px solid #1C1C1C}
 .lp-q{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:13px 16px;border-bottom:1px solid #141414;font-family:Roboto,sans-serif;font-size:14px}.lp-q span{font-weight:700}.lp-q.u span{color:#3D8BFF}.lp-q.d span{color:#F23645}
 .lp-faq{max-width:780px;margin:30px auto 0;text-align:left}.lp-faq details{border:1px solid #1E2842;border-radius:14px;padding:18px 22px;margin-bottom:10px;background:#0A0F1C}.lp-faq summary{cursor:pointer;font-weight:600;font-size:15px}.lp-faq p{color:#9AA4BC;margin-top:10px;line-height:1.65;font-size:14px}
-
+.lp-foot{padding:44px max(20px,calc(50% - 580px));border-top:1px solid #141A2A;color:#5A6580}.lp-foot p{font-size:12px;line-height:1.7;margin:14px 0;max-width:820px}.lp-foot small{font-size:12px}
 @media(max-width:860px){.lp-links,.lp-nav .lp-ghost{display:none}.lp-nav{justify-content:space-between}.lp-hero,.lp-platform{grid-template-columns:1fr;padding-top:40px}.lp-stats{grid-template-columns:repeat(2,1fr)}.lp-steps{grid-template-columns:1fr}.lp-sec{padding:56px 18px}.lp-plan.hot{transform:none}}
 /* ===== MT5 mobile terminal skin ===== */
 :root{--bg:#000;--pn:#121212;--pn2:#1C1C1E;--ln:#262628;--ln2:#333336;--tx:#F2F2F2;--mut:#8E8E93;--dim:#636366;--ac:#3D8BFF;--acbg:rgba(61,139,255,.12);--up:#3D8BFF;--dn:#F23645;--upbg:rgba(61,139,255,.12);--dnbg:rgba(242,54,69,.12)}
@@ -740,7 +741,7 @@ html[dir="rtl"] #drawer{border-left:1px solid #292929}
 }
 @media(max-width:390px){#app.chartMode .odmid{width:43%}#app.chartMode .od .p{font-size:16px}#app.chartMode .odmid button{width:28px}}
 
-/* PLUTUS funding + broker refresh */
+/* Plutus funding + broker refresh */
 .lp-nav{max-width:1200px;margin-inline:auto;gap:18px}
 @media(min-width:701px){.lp-links{display:flex;align-items:center;gap:18px}.lp-nav .lp-ghost{display:inline-flex}}
 .lp-hero{isolation:isolate;position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(5,7,13,.98) 0%,rgba(5,7,13,.91) 48%,rgba(5,7,13,.54) 100%),url("assets/market-practice.jpg") center/cover no-repeat}
@@ -768,7 +769,7 @@ html[dir="rtl"] #drawer{border-left:1px solid #292929}
 </style>
 </head>
 <body>
-<div id="auth"><div class="auth-box" style="display:flex;flex-direction:column;align-items:center"><span class="pmark" style="width:52px;height:52px;font-size:26px">P</span><div style="margin-top:10px;color:var(--mut);font-size:13px;letter-spacing:2px">PLUTUS</div></div></div>
+<div id="auth"><div class="auth-box" style="display:flex;flex-direction:column;align-items:center"><span class="pmark" style="width:52px;height:52px;font-size:26px">P</span><div style="margin-top:10px;color:var(--mut);font-size:13px;letter-spacing:2px">Plutus</div></div></div>
 <div id="app" style="display:none">
   <div style="flex:1;display:flex;flex-direction:column;min-width:0;height:100dvh;position:relative">
     <main id="shellMain">
@@ -797,7 +798,7 @@ window.LT={en:{Charts:'Charts',Trade:'Trade',Quotes:'Quotes',Profile:'Profile'},
 window.T=function(k){var lg='en';try{lg=(JSON.parse(localStorage.getItem('plotos_v1'))||{}).settings.lang||'en'}catch(e){}
  return(window.LT[lg]&&window.LT[lg][k])||window.LT.en[k]||k};
 (function(){var b=document.getElementById('errbar');
- function show(m){if(b){b.style.display='block';b.textContent='PLUTUS: '+m}}
+ function show(m){if(b){b.style.display='block';b.textContent='Plutus: '+m}}
  b.onclick=function(){b.style.display='none'};
  window.addEventListener('error',function(e){var m=e.message||'error';
   if(e.error&&e.error.stack){var ls=String(e.error.stack).split('\n');if(ls[1])m+=' — '+ls[1].trim().slice(0,120)}
@@ -817,7 +818,7 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function todayKey(){return new Date().toLocaleDateString('en-CA')}
 function tsAgo(t){var s=(Date.now()-t)/1e3;return s<60?Math.floor(s)+'s':s<3600?Math.floor(s/60)+'m':s<86400?Math.floor(s/3600)+'h':Math.floor(s/86400)+'d'}
 function fmtDur(ms){var m=Math.floor(ms/60000);if(m<60)return m+'m';var h=Math.floor(m/60);if(h<24)return h+'h '+(m%60)+'m';return Math.floor(h/24)+'d '+(h%24)+'h'}
-function showErr(e){var m=(e&&e.message)?e.message:String(e);var b=document.getElementById('errbar');if(b){b.style.display='block';b.textContent='PLUTUS: '+m}}
+function showErr(e){var m=(e&&e.message)?e.message:String(e);var b=document.getElementById('errbar');if(b){b.style.display='block';b.textContent='Plutus: '+m}}
 function tfetch(url,ms,opts){if(!ms)ms=7000;var c=new AbortController();var t=setTimeout(function(){c.abort()},ms);
  return fetch(url,Object.assign({signal:c.signal},opts||{})).then(function(r){clearTimeout(t);return r},function(e){clearTimeout(t);throw e})}
 function toast(msg,type){var t=document.createElement('div');t.className='toast '+(type||'');t.innerHTML='<i></i><span>'+esc(msg)+'</span>';$('#toasts').appendChild(t);setTimeout(function(){t.classList.add('out');setTimeout(function(){t.remove()},320)},3200)}
@@ -991,16 +992,11 @@ function engineRefresh(){
    (s.orders||[]).forEach(function(o){orders.push({id:o.id,clid:o.id,accId:aid,userId:u.id,symbol:o.symbol,side:o.side,type:o.order_type,lots:+o.lots,price:o.trigger_price==null?null:+o.trigger_price,sl:o.stop_loss,tp:o.take_profit,state:o.status,reason:o.reason,createdAt:Date.parse(o.created_at)||Date.now(),log:[]})});
    (s.ledger||[]).forEach(function(l){if(l.event==='POSITION_PARTIAL_CLOSE'){var d=l.details||{};history.push({id:'ledger-'+l.id,accId:aid,userId:u.id,symbol:d.symbol||'',side:d.side||'',lots:+d.lots||0,entry:+d.entry||0,exit:+d.price||0,pnl:+l.amount||0,comm:0,reason:'partial',note:'',openedAt:Date.parse(l.created_at)||Date.now(),closedAt:Date.parse(l.created_at)||Date.now()})}});
   });
-  // Keep locally/cloud-synced accounts (e.g. funded PROP) that the server engine does not manage.
-  var srvIds={};accountIds.forEach(function(id){srvIds[id]=1});
-  var keepAcc=function(a){return a.userId!==u.id||(!a.serverManaged&&!srvIds[a.id])};
-  var keepRow=function(x){return x.userId!==u.id||(!srvIds[x.accId]&&x.src!=='server'&&DB.accounts.some(function(a){return a.id===x.accId&&keepAcc(a)}))};
-  DB.positions=DB.positions.filter(keepRow).concat(positions);
-  DB.orders=DB.orders.filter(keepRow).concat(orders);
-  DB.history=DB.history.filter(keepRow).concat(history);
-  DB.accounts=DB.accounts.filter(keepAcc).concat(accounts);
-  var myIds=DB.accounts.filter(function(a){return a.userId===u.id&&a.status!=='CLOSED'}).map(function(a){return a.id});
-  if(myIds.indexOf(DB.activeAcc[u.id])<0)DB.activeAcc[u.id]=myIds[0]||null;
+  DB.accounts=DB.accounts.filter(function(a){return a.userId!==u.id}).concat(accounts);
+  DB.positions=DB.positions.filter(function(p){return p.userId!==u.id}).concat(positions);
+  DB.orders=DB.orders.filter(function(o){return o.userId!==u.id}).concat(orders);
+  DB.history=DB.history.filter(function(h){return h.userId!==u.id}).concat(history);
+  if(accountIds.indexOf(DB.activeAcc[u.id])<0)DB.activeAcc[u.id]=accountIds[0]||null;
   ENGINE.online=true;ENGINE.ready=true;ENGINE.lastError=null;CLOUD.online=true;
 	  if(view!=='auth'&&view!=='admin'&&!$('#ovl').classList.contains('on')){renderStrip();if(view==='trade')paintTrade(true);if(view==='hist')renderHist();if(view==='charts'){chartDrawLines();renderChartPositionBar()}}
   return true;
@@ -1012,7 +1008,7 @@ function queuePendingEmails(){
  var me=user(),pending=DB.notifications.filter(function(n){return n&&n.userId===me.id&&!n.emailQueuedAt&&n.id});
  if(!pending.length)return Promise.resolve();
  return pending.reduce(function(chain,n){return chain.then(function(){
-  return CLOUD.sb.from('pf_email_queue').insert({notification_id:n.id,user_id:me.id,recipient_email:me.email,subject:'PLUTUS · '+n.title,body:n.body,level:n.level||'info',status:'QUEUED',created_at:new Date(n.ts||Date.now()).toISOString()}).then(function(r){
+  return CLOUD.sb.from('pf_email_queue').insert({notification_id:n.id,user_id:me.id,recipient_email:me.email,subject:'Plutus · '+n.title,body:n.body,level:n.level||'info',status:'QUEUED',created_at:new Date(n.ts||Date.now()).toISOString()}).then(function(r){
    if(r.error&&r.error.code!=='23505')throw r.error;
    n.emailQueuedAt=Date.now();
   });
@@ -1127,7 +1123,6 @@ function actFirm(tuid,fn){var x=DB.users.find(function(us){return us.id===tuid})
  x._u=Date.now();fn(x);save()}
 
 /* auth */
-var AUTH_PENDING_EMAIL="",AUTH_RESEND_NOT_BEFORE=0;
 function user(){if(!DB)return null;return DB.users.find(function(u){return u.id===DB.session})||null}
 function myAccounts(){var u=user();return u?DB.accounts.filter(function(a){return a.userId===u.id&&a.status!=='REVOKED'}):[]}
 function myAcc(){var u=user();if(!u)return null;
@@ -1148,14 +1143,13 @@ function doSignup(email,pass,name,wantOwner,refCode){
  AUTH_PENDING_EMAIL=email;
  return CLOUD.sb.auth.signUp({email:email,password:pass,options:{emailRedirectTo:authRedirectUrl(),data:{name:name||email.split('@')[0],refCode:refCode||null}}}).then(function(r){
   if(r.error)throw r.error;
-  if(!r.data.user||!r.data.session){AUTH_PENDING_EMAIL=email;AUTH_RESEND_NOT_BEFORE=Date.now()+60000;DB.session=null;DEMO_MODE=false;save();return 'Confirm your email to finish creating your account.'}
-  var u=upsertAuthProfile(r.data.user,name,refCode);CLOUD.authRole=(r.data.user.app_metadata&&r.data.user.app_metadata.role)||null;DB.session=u.id;delete u.pass;save();audit(email,'Signup','user '+u.id,'Supabase Auth');AUTH_PENDING_EMAIL='';
-  return null;})}
+  if(!r.data.user)return 'Check your email to confirm the account';
+  var u=upsertAuthProfile(r.data.user,name,refCode);CLOUD.authRole=(r.data.user.app_metadata&&r.data.user.app_metadata.role)||null;DB.session=u.id;delete u.pass;save();audit(email,'Signup','user '+u.id,'Supabase Auth');
+  return r.data.session?null:'Check your email to confirm the account';})}
 function resendVerification(email){
  if(!email||!CLOUD.ok||!CLOUD.hydrated)return Promise.resolve('Cloud authentication is unavailable');
- var remaining=Math.ceil((AUTH_RESEND_NOT_BEFORE-Date.now())/1000);if(remaining>0)return Promise.resolve('Please wait '+remaining+' seconds before requesting another confirmation email.');
  return CLOUD.sb.auth.resend({type:'signup',email:email,options:{emailRedirectTo:authRedirectUrl()}}).then(function(r){
-  if(r.error)throw r.error;AUTH_RESEND_NOT_BEFORE=Date.now()+60000;return null}).catch(function(e){return e&&e.message?e.message:String(e)})}
+  if(r.error)throw r.error;return null}).catch(function(e){return e&&e.message?e.message:String(e)})}
 function doLogin(email,pass){
  if(!CLOUD.ok||!CLOUD.hydrated)return Promise.resolve('Cloud authentication is unavailable');
  return CLOUD.sb.auth.signInWithPassword({email:email,password:pass}).then(function(r){
@@ -1163,7 +1157,7 @@ function doLogin(email,pass){
   CLOUD.authRole=(r.data.user.app_metadata&&r.data.user.app_metadata.role)||null;var u=upsertAuthProfile(r.data.user);
   if(u.status==='SUSPENDED')return'Account suspended. Contact the manager.';
   if(u.status==='REVOKED')return'Account revoked. Contact the manager.';
-  DB.session=u.id;AUTH_PENDING_EMAIL='';return cloudPull().then(function(){save();audit(email,'Login','user '+u.id,'Supabase Auth');return null})})}
+  DB.session=u.id;return cloudPull().then(function(){save();audit(email,'Login','user '+u.id,'Supabase Auth');return null})})}
 var pendingNativeAuthUrl=null;
 function finishNativeAuthLink(rawUrl){
  if(!window.PLUTUS_NATIVE||!rawUrl)return Promise.resolve();
@@ -1566,7 +1560,7 @@ function histFiltered(f){var h=DB.history.filter(function(x){return user()&&x.us
  return h.filter(function(x){return now-x.closedAt<=ms})}
 function cloudReady(){return CLOUD.ok&&CLOUD.hydrated&&ENGINE.online&&ENGINE.ready}
 var TradingProvider={
-	 name:'PLUTUS Paper Engine v1',
+	 name:'Plutus Paper Engine v1',
  getSymbols:function(){return SYIDS},
  getQuote:function(s){return qt(s)},
  getAccount:function(){return myAcc()},
@@ -1583,7 +1577,7 @@ var TradingProvider={
 function localReady(){return DEMO_MODE||(CLOUD.ok&&CLOUD.hydrated)}
 function useLocal(){return DEMO_MODE||!ENGINE.base}
 var LocalProvider={
- name:'PLUTUS Local Paper',
+ name:'Plutus Local Paper',
  getSymbols:function(){return SYIDS},
  getQuote:function(s){return qt(s)},
  getAccount:function(){return myAcc()},
@@ -2498,18 +2492,18 @@ function updateBadges(){var u=user();if(!u)return;
   else pill.style.display='none'}}
 function openDrawer(){var u=user();if(!u)return;
  if(PORTAL_ADMIN){
-  $('#drawer').innerHTML='<div class="dlogo"><span class="pmark">P</span>PLUTUS Admin</div>'+
+  $('#drawer').innerHTML='<div class="dlogo"><span class="pmark">P</span>Plutus Admin</div>'+
    '<button class="ditem on" data-go="admin">Staff Console</button><div class="dsep"></div>'+
    '<div style="margin-top:auto"><button class="ditem" data-act="out">Log out</button></div>';
   $$('#drawer [data-go]').forEach(function(b){b.onclick=function(){closeDrawer();navGo('admin')}});
   $$('#drawer [data-act="out"]').forEach(function(b){b.onclick=function(){doLogout()}});
   $('#drawer').classList.add('on');$('#dOvl').classList.add('on');return}
- var a=myAcc(),accountName=a?(a.kind==='PAPER'?'Demo':'Zero'):'Trading account',server=a?'PLUTUS · #'+a.login:'No active account';
+ var a=myAcc(),accountName=a?(a.kind==='PAPER'?'Demo':'Zero'):'Trading account',server=a?'Plutus · #'+a.login:'No active account';
  var items=[
   ['charts','⌁','Charts',''],['trade','⇅','Trade',''],['hist','▧','History',''],['messages','✉','Mailbox',''],
   ['@settings','⚙','Settings',''],['@offers','♟','Prop Firm (Funding)',''],['broker','◇','Broker Account',''],
   ['profile','◉','Profile',''],['@about','ⓘ','About','']];
- $('#drawer').innerHTML='<div class="drawer-account"><div class="drawer-brand"><span class="pmark">P</span><div><strong>PLUTUS</strong><small>MetaTrader 5</small></div></div>'+
+ $('#drawer').innerHTML='<div class="drawer-account"><div class="drawer-brand"><span class="pmark">P</span><div><strong>Plutus</strong><small>MetaTrader 5</small></div></div>'+
   '<div class="drawer-meta"><div><b>'+esc(accountName)+'</b><small>'+esc(server)+'</small></div>'+(a&&a.kind==='PAPER'?'<span class="demo-tag">Demo</span>':'')+'</div>'+ 
   '<button class="manage-link" data-act="accounts">Manage accounts</button></div><div class="drawer-list">'+
   items.map(function(it){return'<button class="ditem '+(view===it[0]?'on':'')+'" data-go="'+it[0]+'"><span class="di">'+it[1]+'</span><span>'+it[2]+'</span>'+(it[3]?'<span class="count">'+it[3]+'</span>':'')+'</button>'}).join('')+
@@ -2517,7 +2511,7 @@ function openDrawer(){var u=user();if(!u)return;
  $$('#drawer [data-go]').forEach(function(b){b.onclick=function(){var g=b.getAttribute('data-go');closeDrawer();
   if(g==='@settings'){navGo('charts');setTimeout(function(){try{chartSettings()}catch(e){}},60);return}
   if(g==='@offers'){showOffers();return}
-  if(g==='@about'){toast('PLUTUS · MetaTrader 5 style platform · Biquote market data','up');return}
+  if(g==='@about'){toast('Plutus · MetaTrader 5 style platform · Biquote market data','up');return}
   navGo(g)}});
  var am=$('#drawer [data-act="accounts"]');if(am)am.onclick=function(){closeDrawer();accountsModal()};
  $$('#drawer [data-act="out"]').forEach(function(b){b.onclick=function(){doLogout()}});
@@ -2562,18 +2556,18 @@ function renderAuth(notice){var setup=false;
    return'<div class="lp-plan '+(i===0?'hot':'')+'">'+(i===0?'<em>'+esc(p.badge)+'</em>':'')+'<small>'+esc(p.shortName)+'</small><b>$'+(lo.size/1000)+'K–$'+(hi.size/1000)+'K</b><ul><li><span>Targets</span><i>'+esc(target)+'</i></li><li><span>Max drawdown</span><i>'+(p.trailingDD?'Trailing ':'')+p.maxDDPct+'%</i></li><li><span>Daily limit</span><i>'+(p.dailyLossPct?p.dailyLossPct+'%':'None')+'</i></li><li><span>Leverage</span><i>1:'+lo.lev+'</i></li><li><span>Fee range</span><i>$'+lo.fee+'–$'+hi.fee+'</i></li><li><span>Profit share</span><i>'+p.splitMin+'%–'+p.splitMax+'%</i></li><li><span>Fee credit</span><i>Wallet-paid fee returned at first approved payout</i></li></ul><button class="lp-cta lp-go">'+(p.mode==='instant'?'Request simulated account':'Request challenge review')+'</button></div>'}).join('')}
  $('#auth').style.display='flex';$('#app').style.display='none';
  var landingHtml=PORTAL_ADMIN?'':'<div class="lp">'+
-  '<nav class="lp-nav"><div class="lp-brand"><span class="lp-logo">P</span>PLUTUS</div><div class="lp-links"><a data-go="programs">Programs</a><a data-go="how">How it works</a><a data-go="platform">Platform</a><a data-go="broker">Broker simulator</a><a data-go="faq">FAQ</a></div><button class="lp-ghost" id="preDemo">Open login</button><button class="lp-cta lp-go">Get funded</button></nav>'+
+  '<nav class="lp-nav"><div class="lp-brand"><span class="lp-logo">P</span>PLUTUS</div><div class="lp-links"><a data-go="programs">Programs</a><a data-go="how">How it works</a><a data-go="platform">Platform</a><a data-go="broker">Broker simulator</a><a data-go="faq">FAQ</a></div><button class="lp-ghost" id="preDemo">Sign in for paper trading</button><button class="lp-cta lp-go">Get funded</button></nav>'+
   '<div class="lp-ticker"><div class="lp-track" id="lpTrack"></div></div>'+
-  '<header class="lp-hero"><div class="lp-copy"><span class="lp-pill"><i></i>Simulated programs · clear rules</span><h2>Build your edge.<br><span>Practice with a plan.</span></h2><p>Compare structured simulated funding paths, review risk rules up front, and practice on Biquote-priced markets in an MT5-inspired workspace. Simulated trading only.</p><div class="lp-actions"><button class="lp-cta big lp-go">Start the challenge</button><button class="lp-ghost big" id="preLearn">How it works →</button></div><div class="lp-stats"><div><b>'+PROP_PROGRAMS.length+'</b><small>Funding paths</small></div><div><b>'+BROKER_SIM_TEMPLATES.length+'</b><small>Practice profiles</small></div><div><b>1–2</b><small>Evaluation phases</small></div><div><b>Staff</b><small>Activation review</small></div></div></div><div class="lp-auth" id="heroAuth"><div class="lp-auth-h"><b>Client area</b><span>Sign in or create your profile</span></div></div></header>'+
+  '<header class="lp-hero"><div class="lp-copy"><span class="lp-pill"><i></i>Simulated programs · clear rules</span><h2>Build your edge.<br><span>Practice with a plan.</span></h2><p>Compare structured simulated funding paths, review risk rules up front, and practice on Biquote-priced markets in an MT5-inspired workspace. No live broker or payment processor is connected.</p><div class="lp-actions"><button class="lp-cta big lp-go">Start the challenge</button><button class="lp-ghost big" id="preLearn">How it works →</button></div><div class="lp-stats"><div><b>'+PROP_PROGRAMS.length+'</b><small>Funding paths</small></div><div><b>'+BROKER_SIM_TEMPLATES.length+'</b><small>Practice profiles</small></div><div><b>1–2</b><small>Evaluation phases</small></div><div><b>Staff</b><small>Activation review</small></div></div></div><div class="lp-auth" id="heroAuth"><div class="lp-auth-h"><b>Client area</b><span>Sign in or create your profile</span></div></div></header>'+
   '<div class="lp-trust"><span>Market data</span><b>Biquote</b><span>Variable Bid / Ask</span><span>Historical OHLC</span><span>Streaming ticks</span><span style="display:inline-flex;align-items:center;gap:8px"><img src="assets/mt5-app-icon.png" alt="MetaTrader 5 icon" width="24" height="24" style="object-fit:contain">MT5-style simulator</span></div>'+
   '<section class="lp-sec" id="lp-programs"><span class="lp-kicker">FUNDING PROGRAMS</span><h3>Choose your account size</h3><p class="lp-lead">Compare simulated program paths, sizes and risk rules before requesting review.</p><div class="lp-plans">'+DB.templates.map(function(t,i){return'<div class="lp-plan'+(i==1?' hot':'')+'">'+(i==1?'<em>FEATURED PLAN</em>':'')+'<small>ACCOUNT SIZE</small><b>$'+(t.size/1000)+',000</b><ul><li><span>Profit target</span><i>'+t.profitPct+'%</i></li><li><span>Max drawdown</span><i>'+t.maxDDPct+'%</i></li><li><span>Min. trading days</span><i>'+t.minDays+'</i></li><li><span>Leverage</span><i>1:'+t.lev+'</i></li><li><span>Configured fee</span><i>$'+t.fee+'</i></li></ul><button class="lp-cta lp-go">Start challenge</button></div>'}).join('')+'</div></section>'+
   '<section class="lp-sec" id="lp-broker"><span class="lp-kicker">BROKER SIMULATOR</span><h3>Practice market access, on your terms</h3><p class="lp-lead">Choose a practice profile with variable Biquote pricing and a simulated balance.</p><div class="lp-broker-grid">'+BROKER_SIM_TEMPLATES.map(function(p){return'<article class="lp-broker-card"><span class="lp-broker-tag">PRACTICE PROFILE</span><h4>'+esc(p.name)+'</h4><div class="lp-broker-metrics"><div><small>Practice balance</small><b>$'+p.minDep.toLocaleString()+'</b></div><div><small>Leverage</small><b>1:'+p.lev+'</b></div><div><small>Spread</small><b>'+esc(p.spreadLabel)+'</b></div><div><small>Commission</small><b>$'+p.comm+'/lot</b></div></div><button class="lp-cta lp-go">Create practice profile</button></article>'}).join('')+'</div></section>'+
   '<section class="lp-sec" id="lp-how"><span class="lp-kicker">HOW IT WORKS</span><h3>Three steps to your practice path</h3><div class="lp-steps"><div><i>1</i><b>Choose a path</b><p>Compare the 1-step, 2-step and direct simulated programs and review their rules.</p></div><div><i>2</i><b>Review</b><p>Your simulated account results and risk-rule compliance are recorded for review.</p></div><div><i>3</i><b>Staff review</b><p>Authorized staff review each request before simulated account access is activated.</p></div></div></section>'+
   '<section class="lp-sec lp-platform" id="lp-platform"><div><span class="lp-kicker">PLATFORM</span><h3>A mobile-ready practice terminal</h3><p class="lp-lead">Market Watch, one-click trading, pending orders, SL/TP drag on chart, 30+ indicators, 9 timeframes and full trade history — wherever you are.</p><ul class="lp-feat"><li>Biquote Bid/Ask prices; streaming ticks when available</li><li>Candlestick, bar and line charts</li><li>Market, Limit and Stop orders</li><li>Real-time margin and risk monitoring</li></ul></div><div class="lp-phone"><div class="lp-screen"><div class="lp-qh"><span>Quotes</span></div><div id="lpQuotes"></div></div></div></section>'+
-  '<section class="lp-sec" id="lp-faq"><span class="lp-kicker">FAQ</span><h3>Frequently asked questions</h3><div class="lp-faq"><details><summary>What is a prop trading challenge?</summary><p>An evaluation where you trade a simulated account under configured risk rules.</p></details><details><summary>Where do prices come from?</summary><p>Symbols, Bid/Ask prices and historical candles are supplied by Biquote.</p></details><details><summary>Are funds and payouts real?</summary><p>Trading and balances are simulated; no live broker orders are placed.</p></details><details><summary>What happens when a market closes?</summary><p>The last available Biquote price remains visible, clearly marked as closed, while new market orders stay disabled.</p></details></div></section>'+
-  '</div>';
+  '<section class="lp-sec" id="lp-faq"><span class="lp-kicker">FAQ</span><h3>Frequently asked questions</h3><div class="lp-faq"><details><summary>What is a prop trading challenge?</summary><p>An evaluation where you trade a simulated account under configured risk rules.</p></details><details><summary>Where do prices come from?</summary><p>Symbols, Bid/Ask prices and historical candles are supplied by Biquote.</p></details><details><summary>Are funds and payouts real?</summary><p>No. Plutus is currently a prop-trading simulator. Deposits, withdrawals and broker execution are not enabled.</p></details><details><summary>What happens when a market closes?</summary><p>The last available Biquote price remains visible, clearly marked as closed, while new market orders stay disabled.</p></details></div></section>'+
+  '<footer class="lp-foot"><div class="lp-brand"><span class="lp-logo">P</span>PLUTUS</div><p>Plutus is a trading simulator: accounts, orders, program outcomes and payouts are virtual. No live broker or payment connection is enabled.</p><small>© 2026 Plutus. All rights reserved.</small></footer></div>';
  var html='<div class="auth-box">'+
-  '<div class="logo"><span class="pmark">P</span><img src="assets/mt5-app-icon.png" alt="MetaTrader 5 app icon" width="32" height="32" style="object-fit:contain"><h1>'+(PORTAL_ADMIN?'PLUTUS Admin':'PLUTUS')+'</h1></div>'+
+  '<div class="logo"><span class="pmark">P</span><img src="assets/mt5-app-icon.png" alt="MetaTrader 5 app icon" width="32" height="32" style="object-fit:contain"><h1>'+(PORTAL_ADMIN?'Plutus Admin':'Plutus')+'</h1></div>'+
   '<div class="auth-sub">'+(PORTAL_ADMIN?'Staff & Risk Control Portal · assigned accounts only':(CLOUD.ok?'Cloud connected':'Connecting…'))+'</div>'+landingHtml+
  '<div class="err" id="authErr"></div>';
  if(setup){
@@ -2599,46 +2593,27 @@ function renderAuth(notice){var setup=false;
    '<div class="fld"><label>PASSWORD</label><input id="suPass" type="password" placeholder="6+ characters"></div>'+
    '<div class="fld"><label>REFERRAL CODE (optional)</label><input id="suRef" placeholder="PFXXXXXX"></div>'+
    '<button class="btn" id="suBtn">Create account</button>'+
-   '</div>'+
-
-   '<button class="btn ghost" id="demoBtn">Go to login</button>';
+   '<div class="demo-hint">After signup you can watch prices & charts. A trading account is activated by the manager.</div></div>'+ 
+   '<div style="display:flex;align-items:center;gap:8px;margin:14px 0 4px;color:var(--dim);font-size:10px"><span style="height:1px;background:var(--ln);flex:1"></span>SERVER-SIDE PAPER TRADING<span style="height:1px;background:var(--ln);flex:1"></span></div>'+
+   '<button class="btn ghost" id="demoBtn">Demo Account · One-Click Login</button>'+
+   '<div class="demo-hint">Instant simulated demo account — no sign-up needed.</div>';
  }
  $('#auth').innerHTML=html;
  refreshLandingProgramCards();
  refreshLandingClaims();
  var splitNote=document.querySelector('#auth #lp-programs .lp-lead');if(splitNote)splitNote.textContent+=' Share ranges show configured rates; increases are not automatic.';
- function refreshLandingClaims(){var hero=document.querySelector('#auth .lp-hero .lp-copy');if(hero){var h=hero.querySelector('h2'),p=hero.querySelector('p');if(h)h.innerHTML='Build your edge.<br><span>Practice with a plan.</span>';if(p)p.textContent='Compare simulated funding paths, review clear risk rules and practice with Biquote market data in a mobile-ready workspace. Simulated trading only.';var pill=hero.querySelector('.lp-pill');if(pill)pill.innerHTML='<i></i>Simulated trading environment';var labels=hero.querySelectorAll('.lp-stats small');if(labels.length>1)labels[1].textContent='Practice accounts'}
+ function refreshLandingClaims(){var hero=document.querySelector('#auth .lp-hero .lp-copy');if(hero){var h=hero.querySelector('h2'),p=hero.querySelector('p');if(h)h.innerHTML='Build your edge.<br><span>Practice with a plan.</span>';if(p)p.textContent='Compare simulated funding paths, review clear risk rules and practice with Biquote market data in a mobile-ready workspace. No live broker or payment processor is connected.';var pill=hero.querySelector('.lp-pill');if(pill)pill.innerHTML='<i></i>Simulated trading environment';var labels=hero.querySelectorAll('.lp-stats small');if(labels.length>1)labels[1].textContent='Practice accounts'}
   var trust=document.querySelector('#auth .lp-trust');if(trust)trust.innerHTML='<span>Market data</span><b>Biquote</b><span>Bid / Ask quotes</span><span>Historical OHLC</span><span>Streaming ticks when available</span>';
-  var platform=document.querySelector('#auth .lp-platform');if(platform){var ph=platform.querySelector('h3'),pp=platform.querySelector('.lp-lead');if(ph)ph.textContent='Mobile-ready trading simulator';if(pp)pp.textContent='A familiar trading interface for practice: Market Watch, one-click simulated trades, pending orders, chart tools, indicators and trade history. Trading is simulated; no live broker is connected.'}
+  var platform=document.querySelector('#auth .lp-platform');if(platform){var ph=platform.querySelector('h3'),pp=platform.querySelector('.lp-lead');if(ph)ph.textContent='Mobile-ready trading simulator';if(pp)pp.textContent='A familiar trading interface for practice: Market Watch, one-click simulated trades, pending orders, chart tools, indicators and trade history. No connection to MetaTrader or a live brokerage is enabled.'}
   var nav=document.querySelector('#auth .lp-nav .lp-go');if(nav)nav.textContent='Explore programs';var heroBtn=document.querySelector('#auth .lp-actions .lp-go');if(heroBtn)heroBtn.textContent='Explore simulated programs'}
  (function(){var ha=document.getElementById('heroAuth');if(!ha)return;var box=document.querySelector('#auth .auth-box');box.classList.add('lp-mode');Array.prototype.slice.call(box.children).forEach(function(c){if(!c.classList.contains('lp')&&!c.classList.contains('logo')&&!c.classList.contains('auth-sub'))ha.appendChild(c)});
   document.querySelectorAll('#auth [data-go]').forEach(function(x){x.onclick=function(){var t=document.getElementById('lp-'+x.dataset.go);if(t)t.scrollIntoView({behavior:'smooth'})}});
   document.querySelectorAll('#auth .lp-go').forEach(function(x){x.onclick=function(){var t=document.getElementById('tabUp');if(t)t.click();ha.scrollIntoView({behavior:'smooth',block:'center'})}});
    function draw(){var tr=document.getElementById('lpTrack'),q=document.getElementById('lpQuotes');if(!tr){clearInterval(window.__lpT);return}var h='',qq='';SYIDS.slice(0,8).forEach(function(sym){var s=SYMBOLS[sym]||{digits:5},v=Q[sym]||{},c=v.dirTrend>=0?'u':'d',bid=v.bid>0?v.bid:0,ask=v.ask>0?v.ask:0;h+='<span>'+sym+' <b class="'+c+'">'+(bid?bid.toFixed(s.digits):'—')+'</b></span>';qq+='<div class="lp-q '+c+'"><b>'+sym+'</b><span>'+(bid?bid.toFixed(s.digits):'—')+'</span><span>'+(ask?ask.toFixed(s.digits):'—')+'</span></div>'});tr.innerHTML=h+h;if(q)q.innerHTML=qq}
   draw();clearInterval(window.__lpT);window.__lpT=setInterval(draw,1200)})();
- if(notice)err(notice);
- function err(m,success){
-  var e=$('#authErr');if(!e)return;
-  var raw=String(m&&m.message||m||'').trim(),wait=raw.match(/(?:after|wait)\s+(\d+)\s+seconds?/i);
-  var limited=/security purposes|rate.?limit|too many requests/i.test(raw)||!!wait;
-  var confirmation=/check your email to confirm|confirm your email to finish|verification email sent/i.test(raw);
-  var unverified=/email is not verified|not confirmed/i.test(raw),display=raw;
-  if(limited&&wait)AUTH_RESEND_NOT_BEFORE=Math.max(AUTH_RESEND_NOT_BEFORE,Date.now()+Number(wait[1])*1000);
-  if(/check your email to confirm|confirm your email to finish/i.test(raw))display='Account created. Confirm your email before signing in.';
-  else if(unverified)display='Confirm your email before signing in.';
-  else if(limited&&wait)display='Wait '+wait[1]+' seconds before requesting another confirmation email.';
-  else if(limited)display='Please wait before requesting another confirmation email.';
-  e.classList.toggle('ok',!!success||confirmation||unverified||limited);e.innerHTML=esc(display);
-  if(AUTH_PENDING_EMAIL&&(confirmation||unverified||limited)){
-   e.innerHTML+='<br><button class="mbtn" id="resendVerify" style="margin-top:8px;color:var(--ac);border-color:var(--ac)">Resend verification email</button>';
-   var rb=$('#resendVerify'),remaining=Math.ceil((AUTH_RESEND_NOT_BEFORE-Date.now())/1000);
-   if(remaining>0){rb.disabled=true;var tick=function(){if(!rb.isConnected)return;var left=Math.ceil((AUTH_RESEND_NOT_BEFORE-Date.now())/1000);if(left<=0){rb.disabled=false;rb.textContent='Resend verification email';return}rb.textContent='Resend in '+left+'s';setTimeout(tick,1000)};rb.textContent='Resend in '+remaining+'s';setTimeout(tick,1000)}
-   rb.onclick=function(){if(rb.disabled)return;rb.disabled=true;resendVerification(AUTH_PENDING_EMAIL).then(function(x){rb.disabled=false;if(x)err(x);else err('Verification email sent. Check your inbox and spam folder.',true)})};
-  }
-  e.style.display='block';
- }
+ if(notice){var ne=$('#authErr');if(ne){ne.innerHTML=esc(notice)+(AUTH_PENDING_EMAIL?'<br><button class="mbtn" id="resendVerify" style="margin-top:8px;color:var(--ac);border-color:var(--ac)">Resend verification email</button>':'');ne.style.display='block';var rb=$('#resendVerify');if(rb)rb.onclick=function(){rb.disabled=true;resendVerification(AUTH_PENDING_EMAIL).then(function(m){rb.disabled=false;toast(m?'Resend failed: '+m:'Verification email sent','up')})}}}
+ function err(m){var e=$('#authErr');if(e){e.innerHTML=esc(m);if(AUTH_PENDING_EMAIL&&/verify|confirm|not confirmed/i.test(m)){e.innerHTML+='<br><button class="mbtn" id="resendVerify" style="margin-top:8px;color:var(--ac);border-color:var(--ac)">Resend verification email</button>';var rb=$('#resendVerify');rb.onclick=function(){rb.disabled=true;resendVerification(AUTH_PENDING_EMAIL).then(function(x){rb.disabled=false;toast(x?'Resend failed: '+x:'Verification email sent','up')})}}e.style.display='block'}}
  function pre(){return CLOUD.ok?cloudPull():Promise.resolve()}
- function runAuthButton(button,request,onSuccess){if(!button||button.disabled)return;button.disabled=true;Promise.resolve().then(request).then(function(result){button.disabled=false;if(result)err(result);else{try{onSuccess()}catch(e){err(String(e&&e.message||e))}}},function(e){button.disabled=false;err(String(e&&e.message||e))})}
  if(!setup){
   var pd=$('#preDemo');if(pd)pd.onclick=enterDemo;
   var ps=$('#preStart');if(ps)ps.onclick=function(){var t=$('#tabUp');if(t)t.click();var f=$('#paneUp')||$('#paneIn');if(f)f.scrollIntoView({behavior:'smooth',block:'center'})};
@@ -2648,11 +2623,14 @@ function renderAuth(notice){var setup=false;
    $('#tabUp').onclick=function(){$('#tabUp').classList.add('on');$('#tabIn').classList.remove('on');$('#paneUp').style.display='';$('#paneIn').style.display='none'};
   }
   $('#liBtn').onclick=function(){
-   var email=$('#liEmail').value.trim().toLowerCase();AUTH_PENDING_EMAIL=email;
-   runAuthButton($('#liBtn'),function(){return pre().then(function(){return doLogin(email,$('#liPass').value)})},function(){enterApp()})};
+   AUTH_PENDING_EMAIL=$('#liEmail').value.trim().toLowerCase();
+   pre().then(function(){
+    return doLogin($('#liEmail').value.trim().toLowerCase(),$('#liPass').value)})
+    .then(function(e){e?err(e):enterApp()}).catch(function(e){err(String(e.message||e))})};
   if(!PORTAL_ADMIN)$('#suBtn').onclick=function(){
-   var email=$('#suEmail').value.trim().toLowerCase();AUTH_PENDING_EMAIL=email;
-   runAuthButton($('#suBtn'),function(){return pre().then(function(){return doSignup(email,$('#suPass').value,$('#suName').value.trim(),false,$('#suRef').value.trim().toUpperCase())})},function(){enterApp(true)})};
+   pre().then(function(){
+    return doSignup($('#suEmail').value.trim().toLowerCase(),$('#suPass').value,$('#suName').value.trim(),false,$('#suRef').value.trim().toUpperCase())})
+    .then(function(e){e?err(e):enterApp(true)}).catch(function(e){err(String(e.message||e))})};
   if(!PORTAL_ADMIN){var db=$('#demoBtn');if(db)db.onclick=enterDemo}
  }else{
   $('#auBtn').onclick=function(){
@@ -2665,7 +2643,7 @@ function enterApp(freshSignup){var u=user();
  $('#auth').style.display='none';$('#app').style.display='flex';
  applyTheme();applyLang();renderBNav();$('#bnav').style.display=PORTAL_ADMIN?'none':'';
  if(!PORTAL_ADMIN&&ENGINE.base&&!ENGINE.online)toast('Trading server is unavailable; orders are disabled.','wn');
- if(freshSignup)toast('Welcome to PLUTUS','up');
+ if(freshSignup)toast('Welcome to Plutus','up');
  navGo(PORTAL_ADMIN?'admin':'charts');
  if(CLOUD.ok&&!DEMO_MODE)cloudPull().then(function(){renderView()})}
 
@@ -3155,7 +3133,7 @@ function renderProp(){var el=$('#v-prop'),a=myAcc();
 	  var tpl=DB.templates.find(function(x){return x.id===a.templateId}),isDirect=ch.programMode==='instant';
 	  var title=tpl?esc(tpl.programName||tpl.name):'Simulated program';
 	  var phaseLabel=isDirect?'Direct simulated funding':(ch.phaseCount>1?' · Phase '+(ch.phase||1)+' of '+ch.phaseCount:' · Single phase');
-	  html2+='<div class="brandline"><span class="pmark">P</span>PLUTUS · SIMULATED PROGRAM</div>'+
+	  html2+='<div class="brandline"><span class="pmark">P</span>Plutus · SIMULATED PROGRAM</div>'+
 	  '<div class="cprog"><div style="display:flex;align-items:center;gap:8px"><h3 style="font-size:16px">$'+a.size.toLocaleString()+' '+title+esc(phaseLabel)+'</h3><span class="badge '+ch.status+'">'+ch.status+'</span></div>'+
 	  '<div class="eq" id="chEq">'+money(M.eq)+'</div>'+
 	  (isDirect?'<div class="prow"><span>Evaluation target</span><b>None · staff approval required</b></div>':'<div class="prow"><span>Profit target ('+ch.profitPct+'%)</span><b>'+pp.toFixed(2)+'%</b></div><div class="pbar"><i id="chP1" style="width:'+(ch.profitPct>0?Math.min(100,pp/ch.profitPct*100):0)+'%"></i></div>')+
@@ -3212,7 +3190,7 @@ function plansHTML(){
  (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet" disabled title="Wallet migration pending">Wallet payment temporarily disabled — server migration pending</button>':'')+
  '<button class="btn" style="margin-top:8px" id="rqCrypto">الدفع بالعملات الرقمية (NOWPayments)</button>'+
  '<div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.7">رسوم برنامج محاكاة. يبقى الطلب قيد الانتظار حتى موافقة ADMIN/FINANCE حتى بعد الدفع.</div>'+
- '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">Trading is simulated. NOWPayments invoices require server configuration; account access and payouts require staff review. '+esc(DB.settings.paymentInfo||'')+'</div></div>'}
+ '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">Simulation only: balances and payouts are virtual. Requests await ADMIN/FINANCE approval; no live broker or external payment processor is connected. '+esc(DB.settings.paymentInfo||'')+'</div></div>'}
 function bindReq(){
  $$('[data-program]').forEach(function(p){p.onclick=function(){programSel=p.getAttribute('data-program');var options=selectedProgramTemplates();planSel=options.length?options[0].id:null;renderProp()}});
  $$('[data-plan]').forEach(function(p){p.onclick=function(){planSel=p.getAttribute('data-plan');renderProp()}});
@@ -3228,7 +3206,7 @@ function bindReq(){
   if(!CLOUD.sb){toast('سجّل الدخول أولاً','dn');return}
   rc.disabled=true;
   CLOUD.sb.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s)throw new Error('سجّل الدخول أولاً');
-   var _o;try{_o=window.top.location.origin}catch(e){_o=location.origin}if(/localhost|^capacitor:/.test(_o)||!/^https?:/.test(_o))_o=String(window.PLUTUS_PAYMENTS_API_URL||'').replace(/\/+$/,'');if(!_o)throw new Error('Payment API is not configured for this build');return fetch(_o+'/api/public/payments/invoice',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify({templateId:t.id})})})
+   var _o;try{_o=window.top.location.origin}catch(e){_o=location.origin}if(/localhost|^capacitor:/.test(_o)||!/^https?:/.test(_o))_o=String(window.PLUTUS_PAYMENTS_API_URL||_o).replace(/\/+$/,'');return fetch(_o+'/api/public/payments/invoice',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify({templateId:t.id})})})
   .then(function(res){if(!res.ok)return res.text().then(function(x){throw new Error(x||'تعذر إنشاء الفاتورة')});return res.json()})
   .then(function(d){(window.top||window).location.href=d.url})
   .catch(function(e){rc.disabled=false;toast(e.message,'dn')})};
@@ -3255,7 +3233,7 @@ function downloadCert(a){try{
  x.lineWidth=2;x.strokeRect(58,58,1284,874);
  x.fillStyle='#4D8DFF';x.fillRect(652,105,96,96);
  x.fillStyle='#04122E';x.font='800 58px sans-serif';x.textAlign='center';x.fillText('P',700,175);
- x.fillStyle='#E8ECF6';x.font='700 64px sans-serif';x.fillText('PLUTUS',700,280);
+ x.fillStyle='#E8ECF6';x.font='700 64px sans-serif';x.fillText('Plutus',700,280);
  x.fillStyle='#E3B34C';x.font='600 26px sans-serif';x.fillText('CERTIFICATE OF CHALLENGE PASSED',700,340);
  x.fillStyle='#8792AB';x.font='24px sans-serif';x.fillText('This certifies that',700,430);
  x.fillStyle='#E8ECF6';x.font='700 54px sans-serif';x.fillText(u?u.name:'Trader',700,495);
@@ -3267,7 +3245,7 @@ function downloadCert(a){try{
  x.fillText('Certificate ID: PF-'+a.login,700,700);
  x.fillStyle='#8792AB';x.font='20px sans-serif';
  x.fillText('Issued '+new Date().toLocaleDateString('en',{year:'numeric',month:'long',day:'numeric'}),700,740);
- var link=document.createElement('a');link.download='PLUTUS-certificate-'+a.login+'.png';link.href=c.toDataURL('image/png');link.click()}catch(e){showErr(e)}}
+ var link=document.createElement('a');link.download='Plutus-certificate-'+a.login+'.png';link.href=c.toDataURL('image/png');link.click()}catch(e){showErr(e)}}
 
 /* BROKER */
 function renderBroker(){var el=$('#v-broker'),u=user(),a=myAcc();
@@ -3376,7 +3354,7 @@ function renderProfile(){var el=$('#v-profile'),u=user(),a=myAcc();
  var kc=$('#kycGo');if(kc)kc.onclick=kycModal;
  $('#refCopy').onclick=function(){copyText(refLink)};
  $('#refShare').onclick=function(){
-  if(navigator.share){navigator.share({title:'PLUTUS',text:'Join me — referral '+u.refCode,url:refLink}).catch(function(){})}
+  if(navigator.share){navigator.share({title:'Plutus',text:'Join me — referral '+u.refCode,url:refLink}).catch(function(){})}
   else copyText(refLink)};
  $('#thBtn').onclick=function(){DB.settings.theme=DB.settings.theme==='light'?'light':'dark';save();applyTheme();renderProfile()};
  $('#langSel').onchange=function(){DB.settings.lang=this.value;save();applyLang();renderBNav();renderProfile();toast('Language: '+LANGS[this.value],'up')};

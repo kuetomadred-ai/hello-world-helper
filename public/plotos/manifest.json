@@ -1,6 +1,6 @@
 {
-  "name": "PLUTUS",
-  "short_name": "PLUTUS",
+  "name": "Plutus",
+  "short_name": "Plutus",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
