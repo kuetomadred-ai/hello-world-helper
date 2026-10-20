@@ -1,3 +1,4 @@
+// @ts-nocheck -- loosely typed test harness for untyped plain-JS app code
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
