@@ -1,4 +1,3 @@
-// @ts-nocheck -- loosely typed test harness for untyped plain-JS app code
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";

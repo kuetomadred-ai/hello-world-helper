@@ -1,4 +1,3 @@
-// @ts-nocheck -- loosely typed test harness for untyped plain-JS app code
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -26,6 +25,10 @@ describe("embedded application scripts", () => {
     expect(page).toContain("DB.session=null;DEMO_MODE=false;save()");
     expect(page).toContain("function runAuthButton(button,request,onSuccess)");
     expect(page).toContain('id="demoBtn">Go to login');
+    expect(page).toContain("function enterDemo(){");
+    expect(page).toContain("var tab=$('#tabIn');");
+    expect(page).toContain("tab.click();tab.scrollIntoView");
+    expect(page).not.toContain("demo-trader-local");
   });
 
   it("presents Supabase resend cooldowns as a friendly, non-error status", () => {

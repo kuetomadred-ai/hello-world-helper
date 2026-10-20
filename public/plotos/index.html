@@ -1189,11 +1189,9 @@ function finishNativeAuthLink(rawUrl){
 window.addEventListener('plutus:native-url',function(e){finishNativeAuthLink(e.detail)});
 function enterDemo(){
  if(PORTAL_ADMIN){toast('Demo trading login is available from the Trading Portal only','dn');return}
- DEMO_MODE=true;var id='demo-trader-local';loadLocalTrades(id);var u=DB.users.find(function(x){return x.id===id});
- if(!u){u={id:id,email:'demo@plotos.local',name:'Demo Trader',role:'TRADER',status:'ACTIVE',createdAt:Date.now(),refCode:'PFDEMO01',kyc:'NONE',termsAt:Date.now(),_u:Date.now()};DB.users.push(u)}
- var a=DB.accounts.find(function(x){return x.userId===id&&x.kind==='PAPER'});
- if(!a){a=mkAccount(id,'t50','PAPER');a.login=90001;DB.accounts.push(a)}
- DB.activeAcc[id]=a.id;DB.session=id;CLOUD.authRole='TRADER';termSym=SYMBOLS.XAUUSD?'XAUUSD':(SYMBOLS.XAUUSD_HKN?'XAUUSD_HKN':(SYIDS[0]||termSym));chart.sym=termSym;chart.tf='1m';DB.settings.lastSym=termSym;DB.settings.lastTf='1m';DB.settings.ind.rsi=false;save();audit('demo','Demo Login','account '+a.login,'Local paper account');enterApp(false)
+ var tab=$('#tabIn');
+ if(tab){tab.click();tab.scrollIntoView({behavior:'smooth',block:'center'});return}
+ var auth=$('#auth');if(auth&&auth.scrollIntoView)auth.scrollIntoView({behavior:'smooth',block:'center'})
 }
 function doLogout(){var u=user();var done=!DEMO_MODE&&CLOUD.ok?CLOUD.sb.auth.signOut():Promise.resolve();done.catch(function(){}).then(function(){if(u)audit(u.email,'Logout','user',DEMO_MODE?'Local demo':'Supabase Auth');DB.session=null;DEMO_MODE=false;save();closeDrawer();renderAuth()})}
 window.doLogout=doLogout;
