@@ -13,7 +13,7 @@
     "mobile:android": "bun run mobile:sync:android && cap open android",
     "mobile:ios": "bun run mobile:sync:ios && cap open ios",
     "build:dev": "vite build --mode development",
-    "preview": "vite preview",
+    "preview": "npx wrangler --cwd ./ dev",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",

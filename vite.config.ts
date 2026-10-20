@@ -46,5 +46,6 @@ export default defineConfig(({ command }) => ({
       : []),
     react(),
   ],
-  server: { host: "::", port: 8080 },
+  server: { host: "::", port: 8080, allowedHosts: [".lovable.app"] },
+  preview: { allowedHosts: [".lovable.app"] },
 }));
