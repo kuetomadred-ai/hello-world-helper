@@ -4,6 +4,7 @@ import { z } from "zod";
 import { pathToFileURL } from "node:url";
 import { getEngineStatus } from "./runtime-state.js";
 import { orderPayloadSchema } from "./domain.js";
+import { registerSecurity, requestIdGenerator } from "./security.js";
 
 const env = (name: string) => {
   const value = process.env[name];
@@ -21,7 +22,16 @@ const adminClient = createClient(supabaseUrl, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-const app = Fastify({ logger: true, bodyLimit: 16_384, trustProxy: false });
+const app = Fastify({
+  logger: true,
+  bodyLimit: 16_384,
+  trustProxy: false,
+  genReqId: requestIdGenerator,
+});
+registerSecurity(app, {
+  healthPath: "/health",
+  rateLimit: { windowMs: 60_000, max: 300, maxEntries: 10_000 },
+});
 app.addHook("onRequest", async (request, reply) => {
   const origin = request.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
