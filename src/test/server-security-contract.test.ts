@@ -8,7 +8,11 @@ const fundingSql = readFileSync(
   "utf8",
 );
 const engineSql = readFileSync(
-  path.join(root, "supabase/migrations/20261016090000_server_side_paper_engine.sql"),
+  path.join(root, "supabase/migrations/20261021120244_server_side_paper_engine.sql"),
+  "utf8",
+);
+const historySql = readFileSync(
+  path.join(root, "supabase/migrations/20261021120308_paper_trade_history.sql"),
   "utf8",
 );
 const apiSource = readFileSync(path.join(root, "backend/src/api.ts"), "utf8");
@@ -46,5 +50,14 @@ describe("server-side data access contract", () => {
     expect(apiSource).toContain("verifier.auth.getUser(token)");
     expect(apiSource).toContain('.eq("user_id", user.id)');
     expect(apiSource).toContain('.eq("account_id", account.id)');
+  });
+
+  it("captures closed trades from the trusted ledger with owner-only reads", () => {
+    expect(historySql).toContain(
+      "alter table public.pf_engine_trades_history enable row level security",
+    );
+    expect(historySql).toContain("using (user_id = (select auth.uid()))");
+    expect(historySql).toContain("after insert on public.pf_engine_ledger");
+    expect(historySql).toContain("security definer");
   });
 });

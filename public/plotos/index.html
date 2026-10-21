@@ -936,17 +936,13 @@ function loadDB(){
 }
 var svT=null,clT=null;
 function savePrefs(){try{localStorage.setItem('plotos_prefs',JSON.stringify({theme:DB.settings.theme,lang:DB.settings.lang,lastSym:DB.settings.lastSym,lastTf:DB.settings.lastTf,favorites:DB.settings.favorites,watchlist:DB.settings.watchlist,ind:DB.settings.ind,oscH:DB.settings.oscH,drawings:DB.settings.drawings,priceMargins:DB.settings.priceMargins,chart:DB.settings.chart}))}catch(e){}}
-var TRK=['accounts','positions','orders','history'];
-function tradeKey(uid){return'plutus_trades_v1_'+uid}
-function saveLocalTrades(){var u=user();if(!u||PORTAL_ADMIN)return;var o={ts:Date.now()};TRK.forEach(function(k){o[k]=DB[k].filter(function(x){return x.userId===u.id})});try{localStorage.setItem(tradeKey(u.id),JSON.stringify(o))}catch(e){}}
-function mergeTrades(uid,b){TRK.forEach(function(k){if(Array.isArray(b[k]))DB[k]=DB[k].filter(function(x){return x.userId!==uid}).concat(b[k])})}
-function loadLocalTrades(uid){if(!uid||PORTAL_ADMIN)return;try{var b=JSON.parse(localStorage.getItem(tradeKey(uid))||'null');if(b)mergeTrades(uid,b)}catch(e){}}
-function save(){savePrefs();saveLocalTrades();CLOUD.lastLocal=Date.now();if(DEMO_MODE)return Promise.resolve(true);if(!PORTAL_ADMIN){if(CLOUD.ok&&CLOUD.hydrated&&user()){clearTimeout(clT);clT=setTimeout(function(){cloudPushAux().catch(function(e){CLOUD.lastError=e})},300)}return Promise.resolve(ENGINE.online)}clearTimeout(svT);clearTimeout(clT);
+// Trading accounts and trade history are never persisted in browser storage.
+function save(){savePrefs();CLOUD.lastLocal=Date.now();if(DEMO_MODE)return Promise.resolve(true);if(!PORTAL_ADMIN){if(CLOUD.ok&&CLOUD.hydrated&&user()){clearTimeout(clT);clT=setTimeout(function(){cloudPushAux().catch(function(e){CLOUD.lastError=e})},300)}return Promise.resolve(ENGINE.online)}clearTimeout(svT);clearTimeout(clT);
  if(!CLOUD.ok||!CLOUD.hydrated){CLOUD.pending=true;return Promise.resolve(false)}
  clT=setTimeout(function(){cloudPush().catch(function(e){CLOUD.lastError=e;CLOUD.online=false})},150);
  return Promise.resolve(true)}
-window.addEventListener('beforeunload',function(){savePrefs();saveLocalTrades()});
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){saveLocalTrades();if(!DEMO_MODE&&!PORTAL_ADMIN&&CLOUD.ok&&CLOUD.hydrated&&user())cloudPushAux().catch(function(){})}});
+window.addEventListener('beforeunload',function(){savePrefs()});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){if(!DEMO_MODE&&!PORTAL_ADMIN&&CLOUD.ok&&CLOUD.hydrated&&user())cloudPushAux().catch(function(){})}});
 function mkAccount(userId,templateId,kind){
  var t=DB.templates.find(function(x){return x.id===templateId})||DB.templates[1];
  var isInstant=t.programMode==='instant',targets=challengeTargets(t);
@@ -975,32 +971,29 @@ var ENGINE={base:window.PLUTUS_ENGINE_CLIENT.baseUrl(window.PLUTUS_ENGINE_API_UR
 function engineRequest(path,body){return window.PLUTUS_ENGINE_CLIENT.request(ENGINE.base,CLOUD.sb,path,body)}
 function engineUuid(){return window.PLUTUS_ENGINE_CLIENT.uuid()}
 function enginePosition(x,accountId,userId){return{id:x.id,accId:accountId,userId:userId,symbol:x.symbol,side:x.side,lots:+x.lots,entry:+x.entry_price,sl:x.stop_loss==null?null:+x.stop_loss,tp:x.take_profit==null?null:+x.take_profit,ts:0,openedAt:Date.parse(x.opened_at)||Date.now(),swap:0,src:'server',state:x.status}}
+function engineTrade(x,userId){return{id:x.id,accId:x.account_id,userId:userId,symbol:x.symbol,side:x.side,lots:+x.lots_closed,entry:+x.entry_price,exit:+x.exit_price,sl:null,tp:null,pnl:+x.realized_pnl||0,comm:0,reason:x.close_reason||'MANUAL',note:'',openedAt:Date.parse(x.opened_at)||Date.now(),closedAt:Date.parse(x.closed_at)||Date.now()}}
 function engineRefresh(){
  if(PORTAL_ADMIN)return Promise.resolve(false);
  var u=user();if(!u)return Promise.resolve(false);
  if(!ENGINE.base){ENGINE.online=false;ENGINE.ready=false;return Promise.resolve(false)}
-	 if(ENGINE.syncing)return ENGINE.syncPromise||Promise.resolve(false);ENGINE.syncing=true;
-	 ENGINE.syncPromise=engineRequest('/v1/accounts').then(function(res){
-  var accounts=Array.isArray(res.accounts)?res.accounts:[];
-  return Promise.all(accounts.map(function(row){return engineRequest('/v1/accounts/'+encodeURIComponent(row.id)+'/state').then(function(state){return{row:row,state:state}})}));
- }).then(function(states){
-  var accountIds=states.map(function(x){return x.row.id});
-  var accounts=states.map(function(x){var r=x.row;return{id:r.id,login:r.id,userId:u.id,size:+r.initial_balance,balance:+r.balance,leverage:+r.leverage,currency:'USD',status:r.status,kind:'PAPER',createdAt:Date.parse(r.created_at)||Date.now(),days:[],curve:[{t:Date.now(),e:+r.balance}],dayKey:todayKey(),dayStartEq:+r.balance,highEq:+r.balance,paidTotal:0,swapTotal:0,ch:null,serverManaged:true}});
-  var positions=[],orders=[],history=[];
-  states.forEach(function(x){var aid=x.row.id,s=x.state;
-   (s.positions||[]).forEach(function(p){if(p.status==='OPEN')positions.push(enginePosition(p,aid,u.id));else history.push({id:p.id,accId:aid,userId:u.id,symbol:p.symbol,side:p.side,lots:+p.lots,entry:+p.entry_price,exit:+p.exit_price||0,sl:p.stop_loss,tp:p.take_profit,pnl:+p.realized_pnl||0,comm:0,reason:p.close_reason||'MANUAL',note:'',openedAt:Date.parse(p.opened_at)||Date.now(),closedAt:Date.parse(p.closed_at)||Date.now()})});
-   (s.orders||[]).forEach(function(o){orders.push({id:o.id,clid:o.id,accId:aid,userId:u.id,symbol:o.symbol,side:o.side,type:o.order_type,lots:+o.lots,price:o.trigger_price==null?null:+o.trigger_price,sl:o.stop_loss,tp:o.take_profit,state:o.status,reason:o.reason,createdAt:Date.parse(o.created_at)||Date.now(),log:[]})});
-   (s.ledger||[]).forEach(function(l){if(l.event==='POSITION_PARTIAL_CLOSE'){var d=l.details||{};history.push({id:'ledger-'+l.id,accId:aid,userId:u.id,symbol:d.symbol||'',side:d.side||'',lots:+d.lots||0,entry:+d.entry||0,exit:+d.price||0,pnl:+l.amount||0,comm:0,reason:'partial',note:'',openedAt:Date.parse(l.created_at)||Date.now(),closedAt:Date.parse(l.created_at)||Date.now()})}});
-  });
+ if(ENGINE.syncing)return ENGINE.syncPromise||Promise.resolve(false);ENGINE.syncing=true;
+ ENGINE.syncPromise=engineRequest('/v1/trading/state').then(function(state){
+  var rows=Array.isArray(state.accounts)?state.accounts:[];
+  var accountIds=rows.map(function(r){return r.id});
+  var accounts=rows.map(function(r){return{id:r.id,login:r.id,userId:u.id,size:+r.initial_balance,balance:+r.balance,leverage:+r.leverage,currency:'USD',status:r.status,kind:'PAPER',createdAt:Date.parse(r.created_at)||Date.now(),days:[],curve:[{t:Date.now(),e:+r.balance}],dayKey:todayKey(),dayStartEq:+r.balance,highEq:+r.balance,paidTotal:0,swapTotal:0,ch:null,serverManaged:true}});
+  var positions=(state.openPositions||[]).map(function(p){return enginePosition(p,p.account_id,u.id)});
+  var orders=(state.pendingOrders||[]).map(function(o){return{id:o.id,clid:o.id,accId:o.account_id,userId:u.id,symbol:o.symbol,side:o.side,type:o.order_type,lots:+o.lots,price:o.trigger_price==null?null:+o.trigger_price,sl:o.stop_loss,tp:o.take_profit,state:o.status,reason:o.reason,createdAt:Date.parse(o.created_at)||Date.now(),log:[]}});
+  var history=(state.closedTrades||[]).map(function(x){return engineTrade(x,u.id)});
   DB.accounts=DB.accounts.filter(function(a){return a.userId!==u.id}).concat(accounts);
   DB.positions=DB.positions.filter(function(p){return p.userId!==u.id}).concat(positions);
   DB.orders=DB.orders.filter(function(o){return o.userId!==u.id}).concat(orders);
   DB.history=DB.history.filter(function(h){return h.userId!==u.id}).concat(history);
   if(accountIds.indexOf(DB.activeAcc[u.id])<0)DB.activeAcc[u.id]=accountIds[0]||null;
   ENGINE.online=true;ENGINE.ready=true;ENGINE.lastError=null;CLOUD.online=true;
-	  if(view!=='auth'&&view!=='admin'&&!$('#ovl').classList.contains('on')){renderStrip();if(view==='trade')paintTrade(true);if(view==='hist')renderHist();if(view==='charts'){chartDrawLines();renderChartPositionBar()}}
+  if(view!=='auth'&&view!=='admin'&&!$('#ovl').classList.contains('on')){renderStrip();if(view==='trade')paintTrade(true);if(view==='hist')renderHist();if(view==='charts'){chartDrawLines();renderChartPositionBar()}}
   return true;
-	 }).catch(function(e){ENGINE.online=false;ENGINE.lastError=e;CLOUD.online=false;CLOUD.lastError=e;return false}).then(function(v){ENGINE.syncing=false;ENGINE.syncPromise=null;return v},function(e){ENGINE.syncing=false;ENGINE.syncPromise=null;throw e});return ENGINE.syncPromise
+ }).catch(function(e){ENGINE.online=false;ENGINE.ready=false;ENGINE.lastError=e;CLOUD.online=false;CLOUD.lastError=e;return false}).then(function(v){ENGINE.syncing=false;ENGINE.syncPromise=null;return v},function(e){ENGINE.syncing=false;ENGINE.syncPromise=null;throw e});
+ return ENGINE.syncPromise
 }
 function queuePendingEmails(){
  if(!PORTAL_ADMIN)return Promise.resolve();
@@ -1012,7 +1005,12 @@ function queuePendingEmails(){
    if(r.error&&r.error.code!=='23505')throw r.error;
    n.emailQueuedAt=Date.now();
   });
- })},Promise.resolve()).then(function(){return CLOUD.sb.from('pf_users_data').upsert({user_id:me.id,blob:userBlob(),updated_at:new Date().toISOString()})}).catch(function(e){CLOUD.lastError=e;return null})
+ })},Promise.resolve()).then(function(){
+  return CLOUD.sb.from('pf_users_data').select('blob').eq('user_id',me.id).maybeSingle().then(function(r){
+   var prior=r.data&&r.data.blob||{},next=Object.assign({},prior,userBlob());
+   return CLOUD.sb.from('pf_users_data').upsert({user_id:me.id,blob:next,updated_at:new Date().toISOString()});
+  });
+ }).catch(function(e){CLOUD.lastError=e;return null})
 }
 function cloudLoadSdk(cb){if(window.supabase)return cb(true);
  var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
@@ -1046,39 +1044,33 @@ function applyFirm(b){if(!b)return;
  if(DB.session&&!DB.users.some(function(u){return u.id===DB.session}))DB.session=null;
  save()}
 function userBlob(){var u=user();if(!u)return null;
-	 function f(a){return a.filter(function(x){return x.userId===u.id})}
-	 var tr={};if(!PORTAL_ADMIN&&useLocal()&&!DEMO_MODE){TRK.forEach(function(k){tr[k]=f(DB[k])});tr.tradesAt=Date.now()}
-	 return Object.assign(tr,{notifications:f(DB.notifications),payouts:f(DB.payouts),chRequests:f(DB.chRequests),alerts:f(DB.alerts),wallet:DB.wallets[u.id]||{bal:0,txns:[]},
-	  pset:{lastSym:DB.settings.lastSym,lastTf:DB.settings.lastTf,favorites:DB.settings.favorites,drawings:DB.settings.drawings,ind:DB.settings.ind,oscH:DB.settings.oscH,chart:DB.settings.chart}})}
+ function f(a){return a.filter(function(x){return x.userId===u.id})}
+ return{notifications:f(DB.notifications),payouts:f(DB.payouts),chRequests:f(DB.chRequests),alerts:f(DB.alerts),wallet:DB.wallets[u.id]||{bal:0,txns:[]},
+  pset:{lastSym:DB.settings.lastSym,lastTf:DB.settings.lastTf,favorites:DB.settings.favorites,drawings:DB.settings.drawings,ind:DB.settings.ind,oscH:DB.settings.oscH,chart:DB.settings.chart}}}
 function applyUserAuxBlob(tuid,b){var u=user();if(!b||!u||u.id!==tuid)return;
  ['notifications','payouts','chRequests','alerts'].forEach(function(k){if(Array.isArray(b[k]))DB[k]=DB[k].filter(function(x){return x.userId!==tuid}).concat(b[k])});
  if(b.wallet)DB.wallets[tuid]=b.wallet;
- if(useLocal()&&b.tradesAt&&Date.now()-(CLOUD.lastLocal||0)>3000){var loc=null;try{loc=JSON.parse(localStorage.getItem(tradeKey(tuid))||'null')}catch(e){}if(!loc||!(loc.ts>b.tradesAt)){mergeTrades(tuid,b);saveLocalTrades()}}
  if(b.pset)['lastSym','lastTf','favorites','drawings','ind','oscH','chart'].forEach(function(k){if(b.pset[k]!==undefined)DB.settings[k]=b.pset[k]});savePrefs()}
 function applyUserBlob(tuid,b){var u=user();if(!b||!u||u.id!==tuid)return;
- ['accounts','positions','orders','history','notifications','payouts','chRequests','alerts'].forEach(function(k){
-  DB[k]=DB[k].filter(function(x){return x.userId!==tuid}).concat(b[k]||[])});
+ ['notifications','payouts','chRequests','alerts'].forEach(function(k){DB[k]=DB[k].filter(function(x){return x.userId!==tuid}).concat(b[k]||[])});
  if(b.wallet)DB.wallets[tuid]=b.wallet;
- if(b.pset)['lastSym','lastTf','favorites','drawings','ind','oscH','chart'].forEach(function(k){if(b.pset[k]!==undefined)DB.settings[k]=b.pset[k]});
- save()}
+ if(b.pset)['lastSym','lastTf','favorites','drawings','ind','oscH','chart'].forEach(function(k){if(b.pset[k]!==undefined)DB.settings[k]=b.pset[k]});save()}
 function cloudPushAux(){if(!CLOUD.ok||!CLOUD.hydrated||!user())return Promise.resolve();var u=user(),now=new Date().toISOString(),patch=userBlob();
 	 return CLOUD.sb.from('pf_users_data').select('blob').eq('user_id',u.id).maybeSingle().then(function(r){
 	  var prior=r.data&&r.data.blob||{},next=Object.assign({},prior,patch);
 	  return CLOUD.sb.from('pf_users_data').upsert({user_id:u.id,blob:next,updated_at:now})
 	 }).then(function(r){if(r.error)throw r.error;CLOUD.seen[u.id]=now;return true})}
 function cloudPush(){if(!PORTAL_ADMIN)return cloudPushAux();if(!CLOUD.ok||!CLOUD.hydrated||!user())return Promise.reject(new Error('Cloud database is not ready'));var u=user(),now=new Date().toISOString();
- var p1;
- if(CLOUD.authRole==='ADMIN'){p1=CLOUD.sb.from('pf_firm').upsert({id:'firm',blob:firmBlob(),updated_at:now})}
- else{p1=Promise.resolve()}
- var me=u.id;
- return p1.then(function(){return CLOUD.sb.from('pf_users_data').upsert({user_id:me,blob:userBlob(),updated_at:now})})
-  .then(function(){return queuePendingEmails()}).then(function(){CLOUD.seen[me]=now;CLOUD.seen.firm=now;CLOUD.online=true}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e;throw e})}
+ var p1=CLOUD.authRole==='ADMIN'?CLOUD.sb.from('pf_firm').upsert({id:'firm',blob:firmBlob(),updated_at:now}):Promise.resolve();
+ return p1.then(function(){return CLOUD.sb.from('pf_users_data').select('blob').eq('user_id',u.id).maybeSingle()})
+  .then(function(r){var next=Object.assign({},r.data&&r.data.blob||{},userBlob());return CLOUD.sb.from('pf_users_data').upsert({user_id:u.id,blob:next,updated_at:now})})
+  .then(function(){CLOUD.seen[u.id]=now;CLOUD.seen.firm=now;CLOUD.online=true}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e;throw e})}
 function cloudPull(){if(!CLOUD.ok)return Promise.resolve();
  return CLOUD.sb.from('pf_firm').select('blob,updated_at').eq('id','firm').maybeSingle().then(function(r){
   if(r.data&&(!CLOUD.seen.firm||r.data.updated_at>CLOUD.seen.firm)){applyFirm(r.data.blob);CLOUD.seen.firm=r.data.updated_at}
  }).then(function(){
 	  var u=user();if(!u)return null;
-	  if(!PORTAL_ADMIN){loadLocalTrades(u.id);CLOUD.lastLocal=0}if(!PORTAL_ADMIN)return CLOUD.sb.from('pf_users_data').select('blob,updated_at').eq('user_id',u.id).maybeSingle().then(function(r2){if(r2.data){applyUserAuxBlob(u.id,r2.data.blob);CLOUD.seen[u.id]=r2.data.updated_at}return engineRefresh()});
+	  if(!PORTAL_ADMIN){CLOUD.lastLocal=0}if(!PORTAL_ADMIN)return CLOUD.sb.from('pf_users_data').select('blob,updated_at').eq('user_id',u.id).maybeSingle().then(function(r2){if(r2.data){applyUserAuxBlob(u.id,r2.data.blob);CLOUD.seen[u.id]=r2.data.updated_at}return engineRefresh()});
 	  return CLOUD.sb.from('pf_users_data').select('blob,updated_at').eq('user_id',u.id).maybeSingle().then(function(r2){
 	   if(r2.data&&(!CLOUD.seen[u.id]||r2.data.updated_at>CLOUD.seen[u.id])){applyUserBlob(u.id,r2.data.blob);CLOUD.seen[u.id]=r2.data.updated_at}
 	  });
@@ -1099,26 +1091,22 @@ function cloudPoll(){if(!CLOUD.ok||!user())return Promise.resolve();var u=user()
    renderView()})}
 function cloudGetUser(tuid){return CLOUD.sb.from('pf_users_data').select('blob').eq('user_id',tuid).maybeSingle().then(function(r){return r.data?r.data.blob:null})}
 function cloudAggregate(){return CLOUD.sb.from('pf_users_data').select('user_id,blob').then(function(r){
- var m={};(r.data||[]).forEach(function(x){m[x.user_id]=x.blob||{}});return m}).catch(function(){return{}})}
+ var m={};(r.data||[]).forEach(function(x){var b=Object.assign({},x.blob||{});delete b.accounts;delete b.positions;delete b.orders;delete b.history;delete b.tradesAt;m[x.user_id]=b});return m}).catch(function(){return{}})}
 function localAgg(){var m={};DB.users.forEach(function(u){
  function f(a){return a.filter(function(x){return x.userId===u.id})}
  m[u.id]={accounts:f(DB.accounts),positions:f(DB.positions),orders:f(DB.orders),history:f(DB.history),notifications:f(DB.notifications),payouts:f(DB.payouts),chRequests:f(DB.chRequests),alerts:f(DB.alerts),wallet:DB.wallets[u.id]||{bal:0,txns:[]}}});return m}
 function traderAction(tuid,fn,msg){
  if(!isStaff(user())||DEMO_MODE)return Promise.reject(new Error('Staff authorization required.'));
- if(CLOUD.ok){
-  return cloudGetUser(tuid).then(function(b){
-   b=b||{};['accounts','positions','orders','history','notifications','payouts','chRequests','alerts'].forEach(function(k){if(!Array.isArray(b[k]))b[k]=[]});
-   if(!b.wallet)b.wallet={bal:0,txns:[]};
-   fn(b);
-   return CLOUD.sb.from('pf_users_data').upsert({user_id:tuid,blob:b,updated_at:new Date().toISOString()})})
-  .then(function(){if(msg)toast(msg,'up');if(view==='admin')renderAdmin()})
-  .catch(function(e){toast('Sync error: '+(e.message||e),'dn')})}
- var b=localAgg()[tuid];if(!b)return Promise.resolve();
- fn(b);
- ['accounts','positions','orders','history','notifications','payouts','chRequests','alerts'].forEach(function(k){
-  DB[k]=DB[k].filter(function(x){return x.userId!==tuid}).concat(b[k])});
- if(b.wallet)DB.wallets[tuid]=b.wallet;
- save();if(msg)toast(msg,'up');if(view==='admin')renderAdmin();return Promise.resolve()}
+ if(!CLOUD.ok)return Promise.reject(new Error('Administrative updates require the cloud service.'));
+ return cloudGetUser(tuid).then(function(b){
+  b=b||{};['accounts','positions','orders','history','notifications','payouts','chRequests','alerts'].forEach(function(k){if(!Array.isArray(b[k]))b[k]=[]});
+  if(!b.wallet)b.wallet={bal:0,txns:[]};
+  var tradeSnapshot=JSON.stringify(['accounts','positions','orders','history'].map(function(k){return b[k]}));
+  fn(b);
+  if(tradeSnapshot!==JSON.stringify(['accounts','positions','orders','history'].map(function(k){return b[k]}))){toast('Trading accounts and trades are managed by the server engine.','dn');return false}
+  return CLOUD.sb.from('pf_users_data').upsert({user_id:tuid,blob:b,updated_at:new Date().toISOString()}).then(function(r){if(r.error)throw r.error;return true})
+ }).then(function(updated){if(!updated)return;if(msg)toast(msg,'up');if(view==='admin')renderAdmin()})
+ .catch(function(e){toast('Sync error: '+(e.message||e),'dn')})}
 function actFirm(tuid,fn){var x=DB.users.find(function(us){return us.id===tuid});if(!x)return;
  x._u=Date.now();fn(x);save()}
 
@@ -1182,12 +1170,8 @@ function finishNativeAuthLink(rawUrl){
 }
 window.addEventListener('plutus:native-url',function(e){finishNativeAuthLink(e.detail)});
 function enterDemo(){
- if(PORTAL_ADMIN){toast('Demo trading login is available from the Trading Portal only','dn');return}
- DEMO_MODE=true;var id='demo-trader-local';loadLocalTrades(id);var u=DB.users.find(function(x){return x.id===id});
- if(!u){u={id:id,email:'demo@plotos.local',name:'Demo Trader',role:'TRADER',status:'ACTIVE',createdAt:Date.now(),refCode:'PFDEMO01',kyc:'NONE',termsAt:Date.now(),_u:Date.now()};DB.users.push(u)}
- var a=DB.accounts.find(function(x){return x.userId===id&&x.kind==='PAPER'});
- if(!a){a=mkAccount(id,'t50','PAPER');a.login=90001;DB.accounts.push(a)}
- DB.activeAcc[id]=a.id;DB.session=id;CLOUD.authRole='TRADER';termSym=SYMBOLS.XAUUSD?'XAUUSD':(SYMBOLS.XAUUSD_HKN?'XAUUSD_HKN':(SYIDS[0]||termSym));chart.sym=termSym;chart.tf='1m';DB.settings.lastSym=termSym;DB.settings.lastTf='1m';DB.settings.ind.rsi=false;save();audit('demo','Demo Login','account '+a.login,'Local paper account');enterApp(false)
+	if(PORTAL_ADMIN){toast('Demo trading login is available from the Trading Portal only','dn');return}
+	toast('Sign in to use a server-provisioned paper account; local trading is disabled.','wn')
 }
 function doLogout(){var u=user();var done=!DEMO_MODE&&CLOUD.ok?CLOUD.sb.auth.signOut():Promise.resolve();done.catch(function(){}).then(function(){if(u)audit(u.email,'Logout','user',DEMO_MODE?'Local demo':'Supabase Auth');DB.session=null;DEMO_MODE=false;save();closeDrawer();renderAuth()})}
 window.doLogout=doLogout;
@@ -1574,8 +1558,8 @@ var TradingProvider={
 	 modifyOrder:function(o,price,sl,tp){if(!cloudReady())return Promise.resolve(false);return engineRequest('/v1/orders/'+encodeURIComponent(o.id)+'/modify',{price:price,stopLoss:sl||null,takeProfit:tp||null}).then(function(){return engineRefresh()}).catch(function(e){toast(e.message||'Order update failed','dn');return false})},
 	 cancelOrder:function(o){if(!cloudReady())return Promise.resolve(false);return engineRequest('/v1/orders/'+encodeURIComponent(o.id)+'/cancel',{}).then(function(){return engineRefresh()}).catch(function(e){toast(e.message||'Order cancellation failed','dn');return false})}
 };
-function localReady(){return DEMO_MODE||(CLOUD.ok&&CLOUD.hydrated)}
-function useLocal(){return DEMO_MODE||!ENGINE.base}
+function localReady(){return false}
+function useLocal(){return false}
 var LocalProvider={
  name:'Plutus Local Paper',
  getSymbols:function(){return SYIDS},
@@ -2595,8 +2579,8 @@ function renderAuth(notice){var setup=false;
    '<button class="btn" id="suBtn">Create account</button>'+
    '<div class="demo-hint">After signup you can watch prices & charts. A trading account is activated by the manager.</div></div>'+ 
    '<div style="display:flex;align-items:center;gap:8px;margin:14px 0 4px;color:var(--dim);font-size:10px"><span style="height:1px;background:var(--ln);flex:1"></span>SERVER-SIDE PAPER TRADING<span style="height:1px;background:var(--ln);flex:1"></span></div>'+
-   '<button class="btn ghost" id="demoBtn">Demo Account · One-Click Login</button>'+
-   '<div class="demo-hint">Instant simulated demo account — no sign-up needed.</div>';
+	  '<button class="btn ghost" id="demoBtn">Server Demo Account · Sign In</button>'+
+	  '<div class="demo-hint">Sign in to use a server-provisioned paper account.</div>';
  }
  $('#auth').innerHTML=html;
  refreshLandingProgramCards();

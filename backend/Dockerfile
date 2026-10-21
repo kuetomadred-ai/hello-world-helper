@@ -1,10 +1,10 @@
-FROM node:22-slim
+FROM oven/bun:1.4.3
 WORKDIR /app
-COPY package.json ./
-RUN npm install --omit=optional
-COPY tsconfig.json ./
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
 COPY src ./src
 ENV NODE_ENV=production
 ENV PORT=8787
 EXPOSE 8787
-CMD ["npx", "tsx", "src/start.ts"]
+USER bun
+CMD ["bun", "src/start.ts"]
