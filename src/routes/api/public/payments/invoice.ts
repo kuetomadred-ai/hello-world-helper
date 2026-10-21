@@ -29,7 +29,9 @@ export const Route = createFileRoute("/api/public/payments/invoice")({
         const t = firm?.blob?.templates?.find((x) => x.id === parsed.data.templateId);
         const fee = Number(t?.fee ?? 0);
         const size = Number(t?.size ?? 0);
-        const code = String(t?.programId ?? "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 40);
+        const code = String(t?.programId ?? "")
+          .replace(/[^A-Za-z0-9_-]/g, "")
+          .slice(0, 40);
         if (!t || t.broker || !(fee > 0) || !(size > 0) || code.length < 2)
           return new Response("Program unavailable", { status: 422 });
 

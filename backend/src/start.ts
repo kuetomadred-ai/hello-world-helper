@@ -1,4 +1,16 @@
-// Single-process entry for free hosts (Render/Railway/Fly): runs the API and the price-watching worker together.
-// Both modules start themselves on import.
-await import("./api.js");
-await import("./worker.js");
+import { startApi } from "./api.js";
+import { startWorker } from "./worker.js";
+
+const server = await startApi();
+const stopWorker = startWorker();
+let shuttingDown = false;
+
+async function shutdown(): Promise<void> {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  await stopWorker();
+  await server.close();
+}
+
+process.once("SIGINT", () => void shutdown());
+process.once("SIGTERM", () => void shutdown());

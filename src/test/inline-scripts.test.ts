@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -20,11 +19,21 @@ describe("embedded application scripts", () => {
     });
   });
 
-  it("keeps auth preflight callable and offers one-click simulated demo", () => {
+  it("keeps auth preflight callable without offering a local simulated account", () => {
     expect(page).toContain("var landingHtml=PORTAL_ADMIN?");
     expect(page).toContain("function pre(){return CLOUD.ok?cloudPull():Promise.resolve()}");
     expect(page).not.toMatch(/\bvar pre=/);
-    expect(page).toContain('id="demoBtn">Demo Account · One-Click Login');
-    expect(page).toContain("Instant simulated demo account — no sign-up needed.");
+    expect(page).toContain('id="demoBtn">Server Demo Account · Sign In');
+    expect(page).toContain("Sign in to use a server-provisioned paper account.");
+    expect(page).not.toContain("demo-trader-local");
+  });
+
+  it("uses server state only for balances and trades", () => {
+    expect(page).toContain("engineRequest('/v1/trading/state')");
+    expect(page).toContain("function useLocal(){return false}");
+    expect(page).not.toContain("saveLocalTrades");
+    expect(page).not.toContain("loadLocalTrades");
+    expect(page).not.toContain("plutus_trades_v1_");
+    expect(page).toContain("server-provisioned paper account");
   });
 });

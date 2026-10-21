@@ -1,5 +1,5 @@
 -- Server-side simulated trading engine (paper only; never routes to a broker).
--- Apply only after review in staging. No live project was modified by this task.
+-- Additive engine schema. The live database is changed only by explicit migration application.
 create table if not exists public.pf_engine_instruments (
   symbol text primary key check (symbol ~ '^[A-Z0-9_]{2,20}$'),
   tick_size numeric(24,12) not null check (tick_size > 0),
@@ -12,7 +12,7 @@ create table if not exists public.pf_engine_accounts (
   id text primary key,
   user_id uuid not null references auth.users(id) on delete restrict,
   initial_balance numeric(18,2) not null check (initial_balance > 0),
-  balance numeric(18,2) not null check (balance >= 0),
+  balance numeric(18,2) not null,
   leverage numeric(10,2) not null default 100 check (leverage > 0),
   max_margin_pct numeric(6,2) not null default 100 check (max_margin_pct between 1 and 100),
   status text not null default 'ACTIVE' check (status in ('ACTIVE','LOCKED','CLOSED')),
