@@ -766,6 +766,7 @@ html[dir="rtl"] #drawer{border-left:1px solid #292929}
 .broker-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.broker-chips span{padding:6px 9px;border:1px solid var(--ln);border-radius:999px;color:#C8D5EB;font-size:10px;background:rgba(255,255,255,.025)}
 .broker-photo{position:relative;min-height:185px;border-radius:13px;overflow:hidden;background:#0A1321}.broker-photo img{width:100%;height:100%;min-height:185px;position:absolute;inset:0;object-fit:cover;opacity:.78}.broker-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(9,15,26,.05),rgba(9,15,26,.52))}
 @media(max-width:700px){.lp-nav{gap:9px;padding-inline:14px}.lp-nav .lp-links{display:none}.lp-hero{padding-top:45px;background-position:62% center}.lp-copy h2{font-size:42px}.lp-sec{padding-inline:16px}.lp-broker-grid{grid-template-columns:1fr}.funding-hero{grid-template-columns:1fr;margin:10px;padding:18px}.funding-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.broker-intro{grid-template-columns:1fr;margin:10px;padding:13px}.broker-photo{min-height:150px}.broker-photo img{min-height:150px}}
+.dash-wrap{padding-bottom:24px}.dash-hero{padding:16px 14px 10px;background:linear-gradient(135deg,rgba(77,141,255,.18),transparent 70%);border-bottom:1px solid var(--ln)}.dash-hero h2{font-size:22px}.dash-hero p{color:var(--mut);font-size:11px;margin-top:5px}.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 14px}.dash-card{border:1px solid var(--ln);background:var(--pn);border-radius:11px;padding:11px;min-width:0}.dash-card small{display:block;color:var(--mut);font-size:9px;letter-spacing:.6px;text-transform:uppercase}.dash-card b{display:block;margin-top:6px;font:600 16px var(--mono);overflow:hidden;text-overflow:ellipsis}.dash-card .sub{display:block;margin-top:4px;color:var(--dim);font-size:9px}.dash-section{padding:4px 14px}.dash-section h3{font-size:11px;color:var(--mut);letter-spacing:.8px;margin:10px 0 7px;text-transform:uppercase}.dash-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--ln);font-size:11px}.dash-row:last-child{border-bottom:0}.dash-row .grow{flex:1;min-width:0}.dash-row .grow b,.dash-row .grow span{display:block}.dash-row .grow span{color:var(--mut);font-size:9px;margin-top:3px}.dash-pill{border:1px solid var(--ln2);border-radius:999px;padding:3px 6px;color:var(--mut);font:10px var(--mono)}.dash-pill.up{color:var(--up);border-color:var(--up)}.dash-pill.dn{color:var(--dn);border-color:var(--dn)}.dash-bar{height:5px;border-radius:9px;background:var(--ln2);overflow:hidden;margin-top:7px}.dash-bar i{display:block;height:100%;background:var(--up);border-radius:inherit}.dash-bar i.warn{background:var(--wn)}.dash-bar i.dang{background:var(--dn)}
 </style>
 </head>
 <body>
@@ -774,6 +775,7 @@ html[dir="rtl"] #drawer{border-left:1px solid #292929}
   <div style="flex:1;display:flex;flex-direction:column;min-width:0;height:100dvh;position:relative">
     <main id="shellMain">
       <section class="screen" id="v-quotes"></section>
+      <section class="screen" id="v-dash"></section>
       <section class="screen" id="v-charts"></section>
       <section class="screen" id="v-trade"></section>
       <section class="screen" id="v-hist"></section>
@@ -1027,7 +1029,7 @@ function cloudInit(){
    }).then(function(){return queuePendingEmails()}).then(function(){
     if($('#auth').style.display!=='none')renderAuth();
     if(user())renderView();resolve(true)}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e;reject(e)});
-   var pollBusy=false;setInterval(function(){if(pollBusy||document.hidden)return;pollBusy=true;cloudPoll().then(function(){CLOUD.online=true}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e}).then(function(){pollBusy=false})},1000);
+   var pollBusy=false;setInterval(function(){if(pollBusy)return;pollBusy=true;cloudPoll().then(function(){CLOUD.online=true}).catch(function(e){CLOUD.online=false;CLOUD.lastError=e}).then(function(){pollBusy=false})},1000);
   }catch(e){reject(e)}})});
 }
 function publicUser(u){var p={};Object.keys(u||{}).forEach(function(k){if(k!=='pass')p[k]=u[k]});return p}
@@ -1181,13 +1183,29 @@ function finishNativeAuthLink(rawUrl){
  }).catch(function(e){toast('Could not complete email confirmation: '+(e.message||e),'dn')})
 }
 window.addEventListener('plutus:native-url',function(e){finishNativeAuthLink(e.detail)});
+function demoDeviceId(){
+ var key='plutus_demo_device_v1',saved=null;try{saved=JSON.parse(localStorage.getItem(key)||'null')}catch(e){}
+ if(saved&&saved.deviceId)return saved.deviceId;
+ var id=window.crypto&&crypto.randomUUID?crypto.randomUUID():uid()+'-'+uid()+'-'+uid()+'-'+uid();
+ try{localStorage.setItem(key,JSON.stringify({deviceId:id}))}catch(e){}
+ return id
+}
 function enterDemo(){
- if(PORTAL_ADMIN){toast('Demo trading login is available from the Trading Portal only','dn');return}
- DEMO_MODE=true;var id='demo-trader-local';loadLocalTrades(id);var u=DB.users.find(function(x){return x.id===id});
- if(!u){u={id:id,email:'demo@plotos.local',name:'Demo Trader',role:'TRADER',status:'ACTIVE',createdAt:Date.now(),refCode:'PFDEMO01',kyc:'NONE',termsAt:Date.now(),_u:Date.now()};DB.users.push(u)}
- var a=DB.accounts.find(function(x){return x.userId===id&&x.kind==='PAPER'});
- if(!a){a=mkAccount(id,'t50','PAPER');a.login=90001;DB.accounts.push(a)}
- DB.activeAcc[id]=a.id;DB.session=id;CLOUD.authRole='TRADER';termSym=SYMBOLS.XAUUSD?'XAUUSD':(SYMBOLS.XAUUSD_HKN?'XAUUSD_HKN':(SYIDS[0]||termSym));chart.sym=termSym;chart.tf='1m';DB.settings.lastSym=termSym;DB.settings.lastTf='1m';DB.settings.ind.rsi=false;save();audit('demo','Demo Login','account '+a.login,'Local paper account');enterApp(false)
+ if(PORTAL_ADMIN){toast('Demo trading login is available from the Trading Portal only','dn');return Promise.resolve()}
+ var key='plutus_demo_device_v1',saved=null;try{saved=JSON.parse(localStorage.getItem(key)||'null')}catch(e){}
+ var deviceId=demoDeviceId(),request;
+ if(saved&&saved.email&&saved.password)request=Promise.resolve(saved);
+ else request=fetch('/api/public/demo',{method:'POST',headers:{'Content-Type':'application/json','Cache-Control':'no-store'},body:JSON.stringify({deviceId:deviceId})})
+  .then(function(r){return r.json().catch(function(){return{}}).then(function(body){if(!r.ok)throw new Error(body.error||'Could not create demo account');return body})})
+ return request.then(function(creds){
+  try{localStorage.setItem(key,JSON.stringify(Object.assign({},creds,{deviceId:deviceId})))}catch(e){}
+  if(!CLOUD.ok||!CLOUD.hydrated)throw new Error('Cloud authentication is unavailable');
+  return CLOUD.sb.auth.signInWithPassword({email:creds.email,password:creds.password}).then(function(r){
+   if(r.error)throw r.error;CLOUD.authRole=(r.data.user.app_metadata&&r.data.user.app_metadata.role)||null;
+   var u=upsertAuthProfile(r.data.user,'Demo Trader');DB.session=u.id;DEMO_MODE=false;
+   return cloudPull().then(function(){return engineRefresh()}).then(function(){save();audit(creds.email,'Demo Login','account '+creds.login,'Device-bound server paper account');termSym=SYMBOLS.XAUUSD?'XAUUSD':(SYMBOLS.XAUUSD_HKN?'XAUUSD_HKN':(SYIDS[0]||termSym));chart.sym=termSym;chart.tf='1m';enterApp(false)})
+  })
+ }).catch(function(e){showErr(e);toast(e.message||String(e),'dn');throw e})
 }
 function doLogout(){var u=user();var done=!DEMO_MODE&&CLOUD.ok?CLOUD.sb.auth.signOut():Promise.resolve();done.catch(function(){}).then(function(){if(u)audit(u.email,'Logout','user',DEMO_MODE?'Local demo':'Supabase Auth');DB.session=null;DEMO_MODE=false;save();closeDrawer();renderAuth()})}
 window.doLogout=doLogout;
@@ -2477,7 +2495,7 @@ function navGo(v){view=v;var app=$('#app');if(app)app.classList.toggle('chartMod
 window.navGo=navGo;
 function renderView(){var u=user();
  if(!u){renderAuth();return}
- var fns={quotes:renderQuotes,charts:openCharts,trade:renderTrade,hist:renderHist,messages:renderMessages,prop:renderProp,broker:renderBroker,profile:renderProfile,admin:renderAdmin};
+ var fns={quotes:renderQuotes,dash:renderDash,charts:openCharts,trade:renderTrade,hist:renderHist,messages:renderMessages,prop:renderProp,broker:renderBroker,profile:renderProfile,admin:renderAdmin};
  var fn=fns[view];
  if(!fn)return;
  try{fn()}catch(e){showErr(e);var el=$('#v-'+view);if(el)el.innerHTML='<div class="empty">This screen failed to render.<br>'+esc(e.message)+'</div>'}
@@ -2500,7 +2518,7 @@ function openDrawer(){var u=user();if(!u)return;
   $('#drawer').classList.add('on');$('#dOvl').classList.add('on');return}
  var a=myAcc(),accountName=a?(a.kind==='PAPER'?'Demo':'Zero'):'Trading account',server=a?'Plutus · #'+a.login:'No active account';
  var items=[
-  ['charts','⌁','Charts',''],['trade','⇅','Trade',''],['hist','▧','History',''],['messages','✉','Mailbox',''],
+  ['dash','▦','Dashboard',''],['charts','⌁','Charts',''],['trade','⇅','Trade',''],['hist','▧','History',''],['messages','✉','Mailbox',''],
   ['@settings','⚙','Settings',''],['@offers','♟','Prop Firm (Funding)',''],['broker','◇','Broker Account',''],
   ['profile','◉','Profile',''],['@about','ⓘ','About','']];
  $('#drawer').innerHTML='<div class="drawer-account"><div class="drawer-brand"><span class="pmark">P</span><div><strong>Plutus</strong><small>MetaTrader 5</small></div></div>'+
@@ -2917,6 +2935,21 @@ function positionsModal(){var acc=myAcc();if(!acc){closeModal();return}
  (ords.length?'<div style="padding:10px 14px 4px;font-size:11px;color:var(--mut);font-weight:700">PENDING ORDERS</div>'+ords.map(ordRow).join(''):'')+
  '</div><div class="mrow-btns"><button class="btn ghost" onclick="closeModal()">Close</button></div>');
  bindPosButtons($('#modalBox'))}
+
+function renderDash(){
+ var el=$('#v-dash'),a=myAcc();
+ var html='<div class="phead"><button class="pib" onclick="openDrawer()">'+menuSvg()+'</button><b>Dashboard</b><span class="sp"></span><button class="pib" id="dashAcc" title="Switch account">'+accSvg()+'</button></div>';
+ if(!a){el.innerHTML=html+'<div class="na-card"><h3>No trading account</h3><p>Your isolated demo account will appear here after login.</p></div>';return}
+ var M=accMetrics(a),pos=accPositions(a),ords=accOrders(a),ch=a.ch||{},R=DB.riskRules||{};
+ var dailyLimit=+ch.dailyLossPct||+R.dailyLossPct||0,ddLimit=+ch.maxDDPct||+R.maxDDPct||0;
+ var dailyUsed=dailyLimit?Math.min(100,M.dailyLossPct/dailyLimit*100):0,ddUsed=ddLimit?Math.min(100,M.ddFromStartPct/ddLimit*100):0;
+ function card(label,value,sub){return'<div class="dash-card"><small>'+label+'</small><b>'+value+'</b><span class="sub">'+sub+'</span></div>'}
+ html+='<div class="dash-wrap"><div class="dash-hero"><h2>Account #'+esc(a.login||a.id)+'</h2><p>'+esc(a.kind==='PAPER'?'Isolated demo · server monitored':'Managed trading account')+' · '+esc(a.status||'ACTIVE')+'</p></div>';
+ html+='<div class="dash-grid">'+card('Balance',money(a.balance),'Initial '+money(a.size||a.balance))+card('Equity',money(M.eq),(M.eq-a.balance)>=0?'Unrealized +'+money(M.eq-a.balance):'Unrealized '+money(M.eq-a.balance))+card('Free margin',money(M.free),'Leverage 1:'+pxf(a.leverage,0))+card('Margin level',M.um>0?M.ml.toFixed(0)+'%':'—','Stop-out '+(R.stopoutLevel||20)+'%')+'</div>';
+ html+='<div class="dash-section"><h3>Risk limits</h3><div class="dash-card"><div class="dash-row"><div class="grow"><b>Daily loss</b><span>'+M.dailyLossPct.toFixed(2)+'% used of '+dailyLimit+'%</span><div class="dash-bar"><i class="'+(dailyUsed>85?'dang':dailyUsed>60?'warn':'')+'" style="width:'+dailyUsed+'%"></i></div></div><span class="dash-pill '+(dailyUsed>85?'dn':'')+'">'+dailyUsed.toFixed(0)+'%</span></div><div class="dash-row"><div class="grow"><b>Maximum drawdown</b><span>'+M.ddFromStartPct.toFixed(2)+'% used of '+ddLimit+'%</span><div class="dash-bar"><i class="'+(ddUsed>85?'dang':ddUsed>60?'warn':'')+'" style="width:'+ddUsed+'%"></i></div></div><span class="dash-pill '+(ddUsed>85?'dn':'')+'">'+ddUsed.toFixed(0)+'%</span></div></div></div>';
+ html+='<div class="dash-section"><h3>Open positions · '+pos.length+' · Pending orders · '+ords.length+'</h3><div class="dash-card">'+(pos.length?pos.map(function(x){var q=Q[x.symbol]||{},px=q.bid>0?(x.side==='buy'?q.bid:q.ask):0,pnl=px?pnlUSD(x,px):0;return'<div class="dash-row"><div class="grow"><b>'+esc(x.symbol)+' · '+esc(x.side.toUpperCase())+' '+x.lots+' lot</b><span>Entry '+pxf(x.entry,(SYMBOLS[x.symbol]||{}).digits||5)+' · Current '+(px?pxf(px,(SYMBOLS[x.symbol]||{}).digits||5):'—')+'</span></div><span class="dash-pill '+(pnl>=0?'up':'dn')+'">'+(pnl>=0?'+':'')+pnl.toFixed(2)+'</span></div>'}).join(''):'<div class="empty">No open positions</div>')+(ords.length?'<div style="padding-top:8px">'+ords.map(function(x){return'<div class="dash-row"><div class="grow"><b>'+esc(x.symbol)+' · '+esc(x.type)+' '+x.lots+' lot</b><span>Trigger '+(x.price||'—')+' · '+esc(x.state)+'</span></div><span class="dash-pill">PENDING</span></div>'}).join('')+'</div>':'')+'</div></div>';
+ html+='</div>';el.innerHTML=html;$('#dashAcc').onclick=accountsModal
+}
 
 /* TRADE */
 function renderTrade(){var el=$('#v-trade'),a=myAcc();
